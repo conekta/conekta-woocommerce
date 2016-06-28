@@ -13,30 +13,30 @@
   <input class="input-text" type="text" size="19" maxlength="19" data-conekta="card[number]" />
 </p>
 <p class="form-row form-row-last">
-<label> Nombre del tarjetahabiente <span class="required">*</span></label>
+<label> Nombre del titular de la tarjeta <span class="required">*</span></label>
 <input type="text" data-conekta="card[name]" class="input-text" />
 </p>
 <div class="clear"></div>
 <p class="form-row form-row-first">
-  <label>Mes de expiración <span class="required">*</span></label>
+  <label>Mes de Vencimiento <span class="required">*</span></label>
 <select id="card_expiration" data-conekta="card[exp_month]" class="month" autocomplete="off">
          <option selected="selected" value=""> Mes</option>
-         <option value="1">01 - January</option>
-         <option value="2">02 - February</option>
-         <option value="3">03 - March</option>
-         <option value="4">04 - April</option>
-         <option value="5">05 - May</option>
-         <option value="6">06 - June</option>
-         <option value="7">07 - July</option>
-         <option value="8">08 - August</option>
-         <option value="9">09 - September</option>
-         <option value="10">10 - October</option>
-         <option value="11">11 - November</option>
-         <option value="12">12 - December</option>
+         <option value="1">01 - Enero</option>
+         <option value="2">02 - Febrero</option>
+         <option value="3">03 - Marzo</option>
+         <option value="4">04 - Abril</option>
+         <option value="5">05 - Mayo</option>
+         <option value="6">06 - Junio</option>
+         <option value="7">07 - Julio</option>
+         <option value="8">08 - Agosto</option>
+         <option value="9">09 - Septiembre</option>
+         <option value="10">10 - Octubre</option>
+         <option value="11">11 - Noviembre</option>
+         <option value="12">12 - Diciembre</option>
        </select>
 </p>
 <p class="form-row form-row-last">
-  <label>Año de expiración <span class="required">*</span></label>
+  <label>Año de Vencimiento <span class="required">*</span></label>
 <select id="card_expiration_yr" data-conekta="card[exp_year]" class="year" autocomplete="off">
           <option selected="selected" value=""> Año</option>
           <option value="2015">2015</option>
@@ -54,7 +54,7 @@
 </p>
 <div class="clear"></div>
 <p class="form-row form-row-first">
-    <label>CVC <span class="required">*</span></label>
+    <label>Código de Seguridad (CVC) <span class="required">*</span></label>
     <input class="input-text" type="text" maxlength="4" data-conekta="card[cvc]" value=""  style="border-radius:6px"/>
 </p>
 <div class="clear"></div>
