@@ -29,6 +29,7 @@ function conekta_checkout_init_your_gateway()
                 switch ($_POST["payment_method"]) {
                     case 'conektacard': default:
                         include_once('conekta_card_gateway.php');
+                        include_once('conekta_card_gateway_addons.php');
                     break;
                     case 'conektabanorte':
                         include_once('conekta_banorte_gateway.php');
@@ -45,6 +46,7 @@ function conekta_checkout_init_your_gateway()
             include_once('conekta_gateway_helper.php');
             include_once('conekta_plugin.php');
             include_once('conekta_card_gateway.php');
+            include_once('conekta_card_gateway_addons.php');
             include_once('conekta_cash_gateway.php');
             include_once('conekta_spei_gateway.php');
             include_once('conekta_banorte_gateway.php');

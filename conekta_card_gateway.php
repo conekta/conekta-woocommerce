@@ -140,7 +140,32 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
 
         wp_localize_script('tokenize', 'wc_conekta_params', $params);
     }
-
+    
+    public function save_source($order, $token) {
+        
+        update_post_meta( $order->id, '_conekta_card_token', $token);
+        
+        //Create customer
+        try{
+            $customer = Conekta_Customer::create(array(
+            "name"=> sprintf("%s %s", $order->billing_first_name, $order->billing_last_name),
+            "email"=> $order->billing_email,
+            "phone"=> $order->billing_phone,
+            "cards"=>  array($token) 
+            ));
+            //debug($customer);
+            update_post_meta( $order->id, '_conekta_customer_id', $customer->id );
+            
+            return $customer->id;
+            
+        }catch (Conekta_Error $e){
+            //debug($e->getMessage());
+            return new WP_Error( 'conektacard_error', __( sprintf('Error creating customer: %s', $e->getMessage()), 'conektacard' ) );
+            //el cliente no pudo ser creado
+        }
+        
+    }
+    
     protected function send_to_conekta()
     {
         global $woocommerce;
@@ -149,6 +174,11 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
         Conekta::setLocale("es");
         Conekta::setApiVersion("1.0.0");
         
+        $customer_id = $this->save_source($this->order, $_POST['conekta_token']);
+        debug($customer_id);
+        // if no customer, use token
+        $token_or_customer = is_wp_error($customer_id) ? $_POST['conekta_token'] : $customer_id;
+        //debug($token_or_customer);
         $data = getRequestData($this->order);
 
         try {
@@ -162,7 +192,7 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
                 "amount"      => $data['amount'],
                 "currency"    => $data['currency'],
                 "monthly_installments" => $data['monthly_installments'] > 1 ? $data['monthly_installments'] : null,
-                "card"        => $data['token'],
+                "card"        => $token_or_customer,
                 "reference_id" => $this->order->id,
                 "description" => "Compra con orden # ". $this->order->id . " desde Woocommerce v" . $this->version,
                 "details"     => $details,
@@ -173,6 +203,7 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
                 update_post_meta( $this->order->id, 'meses-sin-intereses', $data['monthly_installments']);
             }
             update_post_meta( $this->order->id, 'transaction_id', $this->transactionId);
+            
             return true;
 
         } catch(Conekta_Error $e) {
@@ -261,7 +292,12 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
 }
 
 function conekta_card_add_gateway($methods) {
-    array_push($methods, 'WC_Conekta_Card_Gateway');
+    if ( class_exists( 'WC_Subscriptions_Order' ) && function_exists( 'wcs_create_renewal_order' ) ) {
+        array_push($methods, 'WC_Conekta_Card_Gateway_Addons');
+    } else {
+        array_push($methods, 'WC_Conekta_Card_Gateway');
+    }
+    
     return $methods;
 }
 
