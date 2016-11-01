@@ -153,9 +153,8 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
             "phone"=> $order->billing_phone,
             "cards"=>  array($token) 
             ));
-            //debug($customer);
+            debug($customer);
             update_post_meta( $order->id, '_conekta_customer_id', $customer->id );
-            
             return $customer->id;
             
         }catch (Conekta_Error $e){
@@ -174,8 +173,9 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
         Conekta::setLocale("es");
         Conekta::setApiVersion("1.0.0");
         
-        $customer_id = $this->save_source($this->order, $_POST['conekta_token']);
-        debug($customer_id);
+        $this->save_source($this->order, $_POST['conekta_token']);
+        $customer_id = get_post_meta($this->order->id, '_conekta_customer_id', true);
+        //debug($customer_id);
         // if no customer, use token
         $token_or_customer = is_wp_error($customer_id) ? $_POST['conekta_token'] : $customer_id;
         //debug($token_or_customer);
