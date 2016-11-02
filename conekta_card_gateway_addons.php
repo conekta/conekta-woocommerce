@@ -52,7 +52,7 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
 	 * Updates other subscription sources.
 	 */
 	public function save_source( $order, $token ) {
-		parent::save_source( $order, $source );
+		$customer_id = parent::save_source( $order, $token );
 
 		// Also store it on the subscriptions being purchased or paid for in the order
 		if ( function_exists( 'wcs_order_contains_subscription' ) && wcs_order_contains_subscription( $order->id ) ) {
@@ -65,10 +65,11 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
 
 		foreach( $subscriptions as $subscription ) {
 			update_post_meta( $subscription->id, '_conekta_card_token', $token );
+            update_post_meta( $subscription->id, '_conekta_customer_id', $customer_id );
 		}
         
-        $customer_id = get_post_meta( $order->id, '_conekta_customer_id', true );
-        update_post_meta( $subscription->id, '_conekta_customer_id', $customer_id );
+        return $customer_id;
+        
         
 	}
 
@@ -83,10 +84,10 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
 		global $woocommerce;
         
 		// Get source from order
-		$customer = get_post_meta( $order->id, '_conekta_customer_id', true );
-        debug($customer);
+		$customer_id = get_post_meta( $order->id, '_conekta_customer_id', true );
+        
 		// Or fail :(
-		if ( ! $customer ) {
+		if ( ! $customer_id ) {
 			return new WP_Error( 'conektacard_error', __( 'Customer not found', 'conektacard' ) );
 		}
 
@@ -113,14 +114,12 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
                 "amount"      => $data['amount'],
                 "currency"    => $data['currency'],
                 "monthly_installments" => $data['monthly_installments'] > 1 ? $data['monthly_installments'] : null,
-                "card"        => $customer,
+                "card"        => $customer_id,
                 "reference_id" => $this->order->id,
                 "description" => "Compra con orden # ". $this->order->id . " desde Woocommerce v" . $this->version,
                 "details"     => $details,
                 ));
-            //debug("start charge");
-            debug($charge);
-            //debug("end charge");
+
             $this->transactionId = $charge->id;
             if ($data['monthly_installments'] > 1) {
                 update_post_meta( $this->order->id, 'meses-sin-intereses', $data['monthly_installments']);

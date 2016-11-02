@@ -145,20 +145,24 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
         
         update_post_meta( $order->id, '_conekta_card_token', $token);
         
+        Conekta::setApiKey($this->secret_key);
+        Conekta::setLocale("es");
+        Conekta::setApiVersion("1.0.0");
+        
         //Create customer
         try{
             $customer = Conekta_Customer::create(array(
             "name"=> sprintf("%s %s", $order->billing_first_name, $order->billing_last_name),
             "email"=> $order->billing_email,
             "phone"=> $order->billing_phone,
-            "cards"=>  array($token) 
+            "cards"=>  array($token)
             ));
-            debug($customer);
+            
             update_post_meta( $order->id, '_conekta_customer_id', $customer->id );
+
             return $customer->id;
             
         }catch (Conekta_Error $e){
-            //debug($e->getMessage());
             return new WP_Error( 'conektacard_error', __( sprintf('Error creating customer: %s', $e->getMessage()), 'conektacard' ) );
             //el cliente no pudo ser creado
         }
@@ -173,14 +177,15 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
         Conekta::setLocale("es");
         Conekta::setApiVersion("1.0.0");
         
-        $this->save_source($this->order, $_POST['conekta_token']);
-        $customer_id = get_post_meta($this->order->id, '_conekta_customer_id', true);
-        //debug($customer_id);
+        $token = $_POST['conekta_token'];
+        
+        $customer_id = $this->save_source($this->order, $token);
+        
         // if no customer, use token
-        $token_or_customer = is_wp_error($customer_id) ? $_POST['conekta_token'] : $customer_id;
-        //debug($token_or_customer);
-        $data = getRequestData($this->order);
+        $token_or_customer = is_wp_error($customer_id) ? $token : $customer_id;
 
+        $data = getRequestData($this->order);
+        
         try {
 
             $line_items = array();
