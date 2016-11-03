@@ -145,9 +145,7 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
 
         } catch(Conekta_Error $e) {
             $description = $e->message_to_purchaser;
-            var_dump($e); die;
-            //debug($e->message_to_purchaser);
-            //debug($charge);
+
             global $wp_version;
             if (version_compare($wp_version, '4.1', '>=')) {
                 //wc_add_notice(__('Error: ', 'woothemes') . $description , $notice_type = 'error');
