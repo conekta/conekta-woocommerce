@@ -23,7 +23,7 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
 			add_action( 'woocommerce_subscription_failing_payment_method_updated_stripe', array( $this, 'update_failing_payment_method' ), 10, 2 );
 
 			// display the credit card used for a subscription in the "My Subscriptions" table
-			add_filter( 'woocommerce_my_subscriptions_payment_method', array( $this, 'maybe_render_subscription_payment_method' ), 10, 2 );
+			// add_filter( 'woocommerce_my_subscriptions_payment_method', array( $this, 'maybe_render_subscription_payment_method' ), 10, 2 );
 
 			// allow store managers to manually set Stripe as the payment method on a subscription
 			add_filter( 'woocommerce_subscription_payment_meta', array( $this, 'add_subscription_payment_meta' ), 10, 2 );
@@ -33,7 +33,14 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
         $this->supports = array( 
             'subscriptions', 
             'products',
-            'tokenization'
+            'tokenization',
+            'subscription_cancellation', 
+            'subscription_suspension', 
+            'subscription_reactivation',
+            'subscription_amount_changes',
+            'subscription_date_changes',
+            'subscription_payment_method_change',
+            'subscription_payment_method_change_admin'
         );
 
 	}
@@ -103,6 +110,8 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
         
         $data = getRequestData($this->order);
 
+
+
         try {
 
             $line_items = array();
@@ -126,10 +135,17 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
             }
             update_post_meta( $this->order->id, 'transaction_id', $this->transactionId);
             
-            return true;
+            $this->completeOrder();
+
+            $result = array(
+                'result' => 'success',
+                'redirect' => $this->get_return_url($this->order)
+                );
+            return $result;
 
         } catch(Conekta_Error $e) {
             $description = $e->message_to_purchaser;
+            var_dump($e); die;
             //debug($e->message_to_purchaser);
             //debug($charge);
             global $wp_version;
@@ -140,6 +156,9 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
                 error_log('Gateway Error:' . $description . "\n");
                 $woocommerce->add_error(__('Error: ', 'woothemes') . $description);
             }
+            
+            $this->markAsFailedPayment();
+            
             return false;
         }
         
@@ -228,11 +247,7 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
 				'_conekta_customer_id' => array(
 					'value' => get_post_meta( $subscription->id, '_conekta_customer_id', true ),
 					'label' => 'Conekta Customer ID',
-				),
-				'_conekta_card_token' => array(
-					'value' => get_post_meta( $subscription->id, '_conekta_card_token', true ),
-					'label' => 'Conekta Card Token',
-				),
+				)
 			),
 		);
 		return $payment_meta;
@@ -250,13 +265,13 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
 	public function validate_subscription_payment_meta( $payment_method_id, $payment_meta ) {
 		if ( $this->id === $payment_method_id ) {
 
-			/*
-            if ( ! isset( $payment_meta['post_meta']['_stripe_customer_id']['value'] ) || empty( $payment_meta['post_meta']['_stripe_customer_id']['value'] ) ) {
-				throw new Exception( 'A "_stripe_customer_id" value is required.' );
-			} elseif ( 0 !== strpos( $payment_meta['post_meta']['_stripe_customer_id']['value'], 'cus_' ) ) {
-				throw new Exception( 'Invalid customer ID. A valid "_stripe_customer_id" must begin with "cus_".' );
+			
+            if ( ! isset( $payment_meta['post_meta']['_conekta_customer_id']['value'] ) || empty( $payment_meta['post_meta']['_conekta_customer_id']['value'] ) ) {
+				throw new Exception( 'A "_conekta_customer_id" value is required.' );
+			} elseif ( 0 !== strpos( $payment_meta['post_meta']['_conekta_customer_id']['value'], 'cus_' ) ) {
+				throw new Exception( 'Invalid customer ID. A valid "_conekta_customer_id" must begin with "cus_".' );
 			}
-            * */
+            
 
 			/*
             if ( ! empty( $payment_meta['post_meta']['_conekta_card_token']['value'] ) && 0 !== strpos( $payment_meta['post_meta']['_conekta_card_token']['value'], 'card_' ) ) {
