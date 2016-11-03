@@ -20,12 +20,12 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
 			add_action( 'woocommerce_scheduled_subscription_payment_' . $this->id, array( $this, 'scheduled_subscription_payment' ), 10, 2 );
 			add_action( 'wcs_resubscribe_order_created', array( $this, 'delete_resubscribe_meta' ), 10 );
 			//add_action( 'wcs_renewal_order_created', array( $this, 'delete_renewal_meta' ), 10 );
-			add_action( 'woocommerce_subscription_failing_payment_method_updated_stripe', array( $this, 'update_failing_payment_method' ), 10, 2 );
+			add_action( 'woocommerce_subscription_failing_payment_method_updated_' . $this->id, array( $this, 'update_failing_payment_method' ), 10, 2 );
 
-			// display the credit card used for a subscription in the "My Subscriptions" table
+			// TODO: display the credit card used for a subscription in the "My Subscriptions" table
 			// add_filter( 'woocommerce_my_subscriptions_payment_method', array( $this, 'maybe_render_subscription_payment_method' ), 10, 2 );
 
-			// allow store managers to manually set Stripe as the payment method on a subscription
+			// allow store managers to manually set ConektaCard as the payment method on a subscription
 			add_filter( 'woocommerce_subscription_payment_meta', array( $this, 'add_subscription_payment_meta' ), 10, 2 );
 			add_filter( 'woocommerce_subscription_validate_payment_meta', array( $this, 'validate_subscription_payment_meta' ), 10, 2 );
 		}
@@ -84,8 +84,6 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
 	 * process_subscription_payment function.
 	 * @param mixed $order
 	 * @param int $amount (default: 0)
-	 * @param string $stripe_token (default: '')
-	 * @param  bool initial_payment
 	 */
 	public function process_subscription_payment( $order = '', $amount = 0 ) {
 		global $woocommerce;
@@ -97,8 +95,6 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
 		if ( ! $customer_id ) {
 			return new WP_Error( 'conektacard_error', __( 'Customer not found', 'conektacard' ) );
 		}
-
-		//WC_Stripe::log( "Info: Begin processing subscription payment for order {$order->id} for the amount of {$amount}" );
 
 		// Make the request
 		$this->order = $order;
@@ -164,7 +160,7 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
 	}
 
 	/**
-	 * Don't transfer Stripe customer/token meta to resubscribe orders.
+	 * Don't transfer Conekta customer/token meta to resubscribe orders.
 	 * @param int $resubscribe_order The order created for the customer to resubscribe to the old expired/cancelled subscription
 	 */
 	public function delete_resubscribe_meta( $resubscribe_order ) {
@@ -173,17 +169,6 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
 		$this->delete_renewal_meta( $resubscribe_order );
 	}
 
-	/**
-	 * Don't transfer Stripe fee/ID meta to renewal orders.
-	 * @param int $resubscribe_order The order created for the customer to resubscribe to the old expired/cancelled subscription
-	 
-	public function delete_renewal_meta( $renewal_order ) {
-		delete_post_meta( $renewal_order->id, 'Stripe Fee' );
-		delete_post_meta( $renewal_order->id, 'Net Revenue From Stripe' );
-		delete_post_meta( $renewal_order->id, 'Stripe Payment ID' );
-		return $renewal_order;
-	}
-    */
     
 	/**
 	 * scheduled_subscription_payment function.
@@ -195,7 +180,7 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
 		$response = $this->process_subscription_payment( $renewal_order, $amount_to_charge );
 
 		if ( is_wp_error( $response ) ) {
-			$renewal_order->update_status( 'failed', sprintf( __( 'Stripe Transaction Failed (%s)', 'woocommerce-gateway-stripe' ), $response->get_error_message() ) );
+			$renewal_order->update_status( 'failed', sprintf( __( 'Conekta Transaction Failed (%s)', 'conekta-card' ), $response->get_error_message() ) );
 		}
 	}
 
@@ -209,15 +194,7 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
 	}
 
 	/**
-	 * Remove order meta
-	 * @param  object $order
-	 
-	public function remove_order_customer_before_retry( $order ) {
-		delete_post_meta( $order->id, '_stripe_customer_id' );
-	}
-    */
-	/**
-	 * Update the customer_id for a subscription after using Stripe to complete a payment to make up for
+	 * Update the customer_id for a subscription after using Conekta card to complete a payment to make up for
 	 * an automatic renewal payment which previously failed.
 	 *
 	 * @access public
@@ -271,11 +248,6 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
 			}
             
 
-			/*
-            if ( ! empty( $payment_meta['post_meta']['_conekta_card_token']['value'] ) && 0 !== strpos( $payment_meta['post_meta']['_conekta_card_token']['value'], 'card_' ) ) {
-				throw new Exception( 'Invalid card ID. A valid "_stripe_card_id" must begin with "card_".' );
-			}
-            * */
 		}
 	}
 
@@ -288,46 +260,9 @@ class WC_Conekta_Card_Gateway_Addons extends WC_Conekta_Card_Gateway {
 	 * @return string the subscription payment method
 	 
 	public function maybe_render_subscription_payment_method( $payment_method_to_display, $subscription ) {
-		// bail for other payment methods
-		if ( $this->id !== $subscription->payment_method || ! $subscription->customer_user ) {
-			return $payment_method_to_display;
-		}
-
-		$stripe_customer    = new WC_Stripe_Customer();
-		$stripe_customer_id = get_post_meta( $subscription->id, '_stripe_customer_id', true );
-		$stripe_card_id     = get_post_meta( $subscription->id, '_stripe_card_id', true );
-
-		// If we couldn't find a Stripe customer linked to the subscription, fallback to the user meta data.
-		if ( ! $stripe_customer_id || ! is_string( $stripe_customer_id ) ) {
-			$user_id            = $subscription->customer_user;
-			$stripe_customer_id = get_user_meta( $user_id, '_stripe_customer_id', true );
-			$stripe_card_id     = get_user_meta( $user_id, '_stripe_card_id', true );
-		}
-
-		// If we couldn't find a Stripe customer linked to the account, fallback to the order meta data.
-		if ( ( ! $stripe_customer_id || ! is_string( $stripe_customer_id ) ) && false !== $subscription->order ) {
-			$stripe_customer_id = get_post_meta( $subscription->order->id, '_stripe_customer_id', true );
-			$stripe_card_id     = get_post_meta( $subscription->order->id, '_stripe_card_id', true );
-		}
-
-		$stripe_customer->set_id( $stripe_customer_id );
-		$cards = $stripe_customer->get_cards();
-
-		if ( $cards ) {
-			$found_card = false;
-			foreach ( $cards as $card ) {
-				if ( $card->id === $stripe_card_id ) {
-					$found_card                = true;
-					$payment_method_to_display = sprintf( __( 'Via %s card ending in %s', 'woocommerce-gateway-stripe' ), ( isset( $card->type ) ? $card->type : $card->brand ), $card->last4 );
-					break;
-				}
-			}
-			if ( ! $found_card ) {
-				$payment_method_to_display = sprintf( __( 'Via %s card ending in %s', 'woocommerce-gateway-stripe' ), ( isset( $cards[0]->type ) ? $cards[0]->type : $cards[0]->brand ), $cards[0]->last4 );
-			}
-		}
-
-		return $payment_method_to_display;
+		
+        TODO: display a nice label for the customer about the car he/she used (eg VISA ***1234)
+        
 	}
     * */
 }
