@@ -25,6 +25,8 @@ What I dont konw if works (but I suppose it does, since its all handled on the w
 * Free trial period
 * Sign up fees
 * Re-subscribe
+* Change payment method (client side)
+* Change plan (client side)
 * what else?
 
 
