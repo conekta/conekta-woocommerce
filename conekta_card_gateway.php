@@ -296,7 +296,12 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
 }
 
 function conekta_card_add_gateway($methods) {
-    array_push($methods, 'WC_Conekta_Card_Gateway');
+    if ( class_exists( 'WC_Subscriptions_Order' ) && function_exists( 'wcs_create_renewal_order' ) ) {
+        array_push($methods, 'WC_Conekta_Card_Gateway_Addons');
+    } else {
+        array_push($methods, 'WC_Conekta_Card_Gateway');
+    }
+    
     return $methods;
 }
 
