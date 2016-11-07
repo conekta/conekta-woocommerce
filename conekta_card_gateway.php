@@ -243,7 +243,9 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
 
             // adjust stock levels and change order status
         $this->order->payment_complete();
-        $woocommerce->cart->empty_cart();
+        
+        if (isset($woocommerce->cart) && is_object($woocommerce->cart))
+            $woocommerce->cart->empty_cart();
 
         $this->order->add_order_note(
            sprintf(
