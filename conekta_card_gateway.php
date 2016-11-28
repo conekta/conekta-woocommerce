@@ -127,7 +127,7 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
     }
 
     public function payment_scripts() {
-        if (!is_checkout()) {
+        if (!is_checkout() || $this->enabled == 'no' || !$this->enabled) {
             return;
         }
 

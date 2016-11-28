@@ -26,11 +26,8 @@ jQuery(document).ready(function($) {
 		$('form.checkout').find('[name="conekta_token"]').remove();
 	});
 
-	$('form.checkout').bind('checkout_place_order', function (e) {
+	$('form.checkout').bind('checkout_place_order_conektacard', function (e) {
 
-		if ($('input[name="payment_method"]:checked').val() != 'conektacard') {
-			return true;
-		}
 		$form.find('.payment-errors').html('');
 		$form.block({message: null, overlayCSS: {background: "#fff url(" + woocommerce_params.ajax_loader_url + ") no-repeat center", backgroundSize: "16px 16px", opacity: 0.6}});
 
