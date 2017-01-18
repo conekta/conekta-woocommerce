@@ -23,6 +23,8 @@
 		"card_name" => "Card holder name",
 		"card_number" => "Card number",
 		"month_options" => "Expiry month",
+		"latest_card" => "Latest card used: ",
+		"new_card" => "New Card",
 		"year_options" => "Expiry year",
 		"payment_type" => "Payment type",
 		"month" => "Month",

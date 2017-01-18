@@ -157,12 +157,48 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
             $items = $this->order->get_items();
             $line_items = build_line_items($items);
             $details = build_details($data, $line_items);
-
+            
+            $token = $data['token'];
+            if(is_user_logged_in()){
+	        $user_id = get_current_user_id();
+	        $customer_id = get_user_meta($user_id, 'conekta_id', true);
+	        if(!$customer_id){
+	            try{
+	                $customer = Conekta_Customer::create(array(
+	                "name"=> $data['card']['name'],
+	                "email"=> $data['card']['email'],
+	                "phone"=> $data['card']['phone'],
+	                "cards"=>  array($data['token']) 
+	                ));
+	                $card = $customer->cards[0];
+	                update_user_meta( $user_id, 'conekta_card_last4', $card->last4);
+		        update_user_meta( $user_id, 'conekta_card_brand', $card->brand);
+	                update_user_meta( $user_id, 'conekta_id', $customer->id);
+	                $token = $customer->id;
+	            }catch (Conekta_Error $e){
+	                update_user_meta( $user_id, 'conekta_latest_error', $e->getMessage());
+	            }
+	        }
+	        else{
+	            $customer = Conekta_Customer::find($customer_id);
+	            if(substr($data['token'],0,3)=='tok'){
+	            	try{
+		                $card = $customer->cards[0]->update(array('token' => $data['token']));
+		                update_user_meta( $user_id, 'conekta_card_last4', $card->last4);
+		                update_user_meta( $user_id, 'conekta_card_brand', $card->brand);
+	                }catch (Conekta_Error $e){
+		                update_user_meta( $user_id, 'conekta_latest_error', $e->getMessage());
+		        }
+	            }
+	            $token = $customer->id;
+	        }
+	    }
+            
             $charge = Conekta_Charge::create(array(
                 "amount"      => $data['amount'],
                 "currency"    => $data['currency'],
                 "monthly_installments" => $data['monthly_installments'] > 1 ? $data['monthly_installments'] : null,
-                "card"        => $data['token'],
+                "card"        => $token,
                 "reference_id" => $this->order->id,
                 "description" => "Compra con orden # ". $this->order->id . " desde Woocommerce v" . $this->version,
                 "details"     => $details,

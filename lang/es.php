@@ -25,6 +25,8 @@
 		"month_options" => "Mes de expiración",
 		"year_options" => "Año de expiración",
 		"payment_type" => "Tipo de Pago",
+		"latest_card" => "Última tarjeta utilizada: ",
+		"new_card" => "Nueva tarjeta",
 		"month" => "Mes",
 		"year" => "Año",
 		"single_payment" => "Pago único"
