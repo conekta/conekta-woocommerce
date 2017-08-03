@@ -1,71 +1,101 @@
-<?php
-class Conekta_Error extends Exception
+<?php 
+
+namespace Conekta;
+
+use \Conekta\Lang;
+use \Conekta\Conekta;
+use \Exception;
+
+class Error extends Exception
 {
-	public function __construct($message=null, $message_to_purchaser=null, $type=null, $code=null, $params=null) {
-		parent::__construct($message);
-		$this->message = $message;
-		$this->message_to_purchaser = $message_to_purchaser;
-		$this->type = $type;
-		$this->code = $code;
-		$this->params = $params;
-	}
-	
-	public static function errorHandler($resp, $code) {
-		$resp = json_decode($resp, true);
-		$message = isset($resp['message']) ? $resp['message'] : null;
-		$message_to_purchaser = isset($resp['message_to_purchaser']) ? $resp['message_to_purchaser'] : null;
-		$type = isset($resp['type']) ? $resp['type'] : null;
-		$params = isset($resp['param']) ? $resp['param'] : null;
-		if (isset($code) != true || $code == 0) {
-			throw new Conekta_NoConnectionError(
-				LANG::translate('error.requestor.connection', array('BASE'=>Conekta::$apiBase), LANG::EN),
-				LANG::translate('error.requestor.connection_purchaser', null, Conekta::$locale),
-				$type, $code, $params);
-		}
-		switch ($code) {
-			case 400:
-				throw new Conekta_MalformedRequestError($message, $message_to_purchaser, $type, $code, $params);
-			case 401:
-				throw new Conekta_AuthenticationError($message, $message_to_purchaser, $type, $code, $params);
-			case 402:
-				throw new Conekta_ProcessingError($message, $message_to_purchaser, $type, $code, $params);
-			case 404:
-				throw new Conekta_ResourceNotFoundError($message, $message_to_purchaser, $type, $code, $params);
-			case 422:
-				throw new Conekta_ParameterValidationError($message, $message_to_purchaser, $type, $code, $params);
-			case 500:
-				throw new Conekta_ApiError($message, $message_to_purchaser, $type, $code, $params);
-			default:
-				throw new Conekta_Error($message, $message_to_purchaser, $type, $code, $params);
-		}
-	}
+
+    public function __get($property)
+    {   
+        if (property_exists($this, $property)) {
+            return $this->$property;
+        }
+    }
+
+    public function  __isset($property)
+    {
+        return isset($this->$property);
+    }
+    
+    public static function build($resp, $http_code)
+    {
+        $message = isset($resp['message']) ? $resp['message'] : null;
+        $message_to_purchaser = isset($resp['message_to_purchaser']) ? $resp['message_to_purchaser'] : null;
+        $type = isset($resp['type']) ? $resp['type'] : null;
+        $params = isset($resp['param']) ? $resp['param'] : null;
+
+        $debug_message = isset($resp['debug_message']) ? $resp['debug_message'] : null;
+        $code = isset($resp['code']) ? $resp['code'] : null;
+
+        if (isset($http_code) != true || $http_code == 0) {
+            return new NoConnectionError(
+                Lang::translate('error.requestor.connection', Lang::EN, array('BASE' => Conekta::$apiBase)),
+                Lang::translate('error.requestor.connection_purchaser', Conekta::$locale),
+                $type, $http_code, $params);
+        }
+
+        switch ($http_code) {
+            case 400:
+                return new MalformedRequestError($message, $message_to_purchaser, $type, $code, $params);
+            case 401:
+                return new AuthenticationError($message, $message_to_purchaser, $type, $code, $params);
+            case 402:
+                return new ProcessingError($message, $message_to_purchaser, $type, $code, $params);
+            case 404:
+                return new ResourceNotFoundError($message, $message_to_purchaser, $type, $code, $params);
+            case 422:
+                return new ParameterValidationError($message, $message_to_purchaser, $type, $code, $params);
+            case 500:
+                return new ApiError($message, $message_to_purchaser, $type, $code, $params);
+            default:
+                return new self($message, $message_to_purchaser, $type, $code, $params);
+        }
+    }
+
+    public function __construct($message = null, $message_to_purchaser = null, $type = null, $code = null, $params = null)
+    {
+        parent::__construct($message);
+        $this->message = $message;
+        $this->message_to_purchaser = $message_to_purchaser;
+        $this->type = $type;
+        $this->code = $code;
+        $this->params = $params;
+    }
+
+    public static function errorHandler($resp, $http_code)
+    {
+        throw self::build($resp, $http_code);
+    }
 }
 
-	class Conekta_ApiError extends Conekta_Error {
-		
-	}
-	
-	class Conekta_NoConnectionError extends Conekta_Error {
-		
-	}
+class ApiError extends Error
+{
+}
 
-	class Conekta_AuthenticationError extends Conekta_Error {
-		
-	}
+class NoConnectionError extends Error
+{
+}
 
-	class Conekta_ParameterValidationError extends Conekta_Error {
-		
-	}
+class AuthenticationError extends Error
+{
+}
 
-	class Conekta_ProcessingError extends Conekta_Error {
-		
-	}
+class ParameterValidationError extends Error
+{
+}
 
-	class Conekta_ResourceNotFoundError extends Conekta_Error {
-		
-	}
+class ProcessingError extends Error
+{
+}
 
-	class Conekta_MalformedRequestError extends Conekta_Error {
-		
-	}
-?>
+class ResourceNotFoundError extends Error
+{
+}
+
+class MalformedRequestError extends Error
+{
+}

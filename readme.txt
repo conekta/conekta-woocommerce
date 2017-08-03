@@ -3,7 +3,7 @@ Contributors: cristinarandall
 Tags: free, oxxo, conekta, mexico, payment gateway
 Requires at least: 3.5.2
 Tested up to: 4.2.2
-Stable tag: 0.4.3
+Stable tag: 2.0.12
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
@@ -53,9 +53,24 @@ Replace to tusitio.com with your domain name
 * Barcode sent in mail and displayed in order the confirmation page
 * Order Status changed dynamically once webhook is added in Conekta.io Account
 
-= 0.2.0 = 
+= 0.2.0 =
 * Added option for difered payments for 3, 6, and 12 months
 * Enable or disable difered payments from the admin
 
 = 0.3.0 =
 * Added additional parameters required for more robust anti-fraude service for card payments 
+
+= 2.0.0 =
+* Added taxes
+* Added discounts
+* Added shipping
+* Added orders
+* Oxxo pay
+* Fix webhooks for paid orders (previously paid charges)
+* Remove Banorte
+
+= 2.0.5 =
+* Fix shipping validations for virtual products
+* Fix rounding for non-integer cents
+* Add expiration date for oxxo pay
+* Fix webhooks for paid orders

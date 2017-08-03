@@ -29,7 +29,7 @@
 
 === 1.9.6 2014-05-12
 
-* Return empty Conekta_Object instead of empty array in Util.php
+* Return empty Object instead of empty array in Util.php
 
 === 1.9.7 2014-05-22
 
@@ -43,5 +43,42 @@
 
 * Remove simpletest.
 * Change YAML to arrays.
-* Add support for namespaces.
 * (Thanks to https://github.com/joecohens)
+
+
+=== 2.0.0 2016-01-25
+
+* Remove strpos warning in Object class.
+* Add Webhook and WebhookLog models.
+* Fix Charge specs.
+
+=== 2.0.1 2016-01-26
+
+* Fix Util.php for 'url' field name replacement.
+* Complete specs for offline payments.
+
+=== 2.0.3 2016-02-23
+
+* Change Language module to Conekta_Language.
+
+=== 2.0.4 2016-02-23
+
+* Move Conekta_Language to Conekta folder.
+
+=== 2.0.5 2016-07-05
+
+* Add Log model.
+
+=== 3.0.0 2016-11-16
+
+* Add namespaces to master.
+
+=== 3.1.0 2017-01-25
+
+* Order's submodels added. New Order flow
+* Supporting now API 2.0
+* Check https://www.conekta.io/es/docs/api v1.1 for further information
+
+=== 3.2.0 2017-02-15
+
+* Stable version of API 2.0.0.

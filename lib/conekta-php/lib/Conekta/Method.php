@@ -1,5 +1,9 @@
-<?php
-class Conekta_Method extends Conekta_Resource
+<?php 
+
+namespace Conekta;
+
+use \Conekta\Resource;
+
+class Method extends Resource
 {
 }
-?>

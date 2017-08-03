@@ -1,7 +1,7 @@
 
 ![alt tag](https://raw.github.com/conekta/conekta-php/master/readme_files/cover.png)
 
-# Conekta PHP v.1.9.9
+# Conekta PHP v.3.2.0
 
 This is a php library that allows interaction with https://api.conekta.io API.
 
@@ -17,54 +17,45 @@ To get started, add the following to your PHP script:
 
 You can also install this library with composer:
 
-  require: "conekta/conekta-php": "dev-master"
+  require: "conekta/conekta-php": "3.1.0"
 
 ## Usage
 ```php
-Conekta::setApiKey('1tv5yJp3xnVZ7eK67m4h');
-try {
-  $charge = Conekta_Charge::create(array(
-    "amount"=> 51000,
-    "currency"=> "MXN",
-    "description"=> "Pizza Delivery",
-    "reference_id"=> "orden_de_id_interno",
-    "card"=> $_POST['conektaTokenId']
-    //"tok_a4Ff0dD2xYZZq82d9"
-  ));
-} catch (Conekta_Error $e) {
-  echo $e->getMessage();
-  //El pago no pudo ser procesado
-}
-
-{
-  "id": "5286828b8ee31e64b7001739",
-  "livemode": false,
-  "created_at": 1384546955,
-  "status": "paid",
-  "currency": "MXN",
-  "description": "Some desc",
-  "reference_id": null,
-  "failure_code": null,
-  "failure_message": null,
-  "object": "charge",
-  "amount": 2000,
-  "fee": 371,
-  "payment_method": {
-    "name": "Mario Moreno",
-    "exp_month": "05",
-    "exp_year": "15",
-    "auth_code": "861491",
-    "object": "card_payment",
-    "last4": "4242",
-    "brand": "visa"
-  },
-  "details": {
-    "name": null,
-    "phone": null,
-    "email": null,
-    "line_items": []
-  }
-}
+setApiKey();
+$valid_order =
+    array(
+        'line_items'=> array(
+            array(
+                'name'        => 'Box of Cohiba S1s',
+                'description' => 'Imported From Mex.',
+                'unit_price'  => 20000,
+                'quantity'    => 1,
+                'sku'         => 'cohb_s1',
+                'category'    => 'food',
+                'type'        => 'physical',
+                'tags'        => array('food', 'mexican food')
+                )
+           ),
+          'currency'    => 'mxn',
+          'metadata'    => array('test' => 'extra info'),
+          'charges'     => array(
+              array(
+                  'payment_source' => array(
+                      'type'       => 'oxxo_cash',
+                      'expires_at' => strtotime(date("Y-m-d H:i:s")) + "36000"
+                   ),
+                   'amount' => 20000
+                )
+            ),
+            'currency'      => 'mxn',
+            'customer_info' => array(
+                'name'  => 'John Constantine',
+                'phone' => '+5213353319758',
+                'email' => 'hola@hola.com'
+            )
+        );
+		
+$order = \Conekta\Order::create($valid_order);
 ```
 
 ## Documentation
@@ -79,8 +70,15 @@ In order to run tests you have to install SimpleTest (https://github.com/simplet
 
 Run test suite:
 
-    php ./test/Conekta.php
+    php ./test/Conekta-2.0.php
 
 License
 -------
 Developed by [Conekta](https://www.conekta.io). Available with [MIT License](LICENSE).
+
+We are hiring
+-------------
+
+If you are a comfortable working with a range of backend languages (Java, Python, Ruby, PHP, etc) and frameworks, you have solid foundation in data structures, algorithms and software design with strong analytical and debugging skills. 
+Send your CV, github to quieroser@conekta.io
+
