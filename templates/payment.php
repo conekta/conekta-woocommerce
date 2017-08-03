@@ -5,6 +5,62 @@
  * Url     : https://www.conekta.io/es/docs/plugins/woocommerce
  */
 ?>
+<!-- NC fix -->
+<script type="text/javascript" src="https://conektaapi.s3.amazonaws.com/v0.3.2/js/conekta.js"></script>
+<script>
+var alreadyTokenize = false;
+var firsTime = true;
+jQuery(document).ready(function () {
+  Conekta.setPublishableKey('**Insert public Key test or live, you can retrieve it from PHP with a var inside a script inside an echo**');
+  jQuery('form.checkout').submit(function(event){
+    /* This work with my current theme but its the same if you have it in a tab or something like that*/
+    var seleccionado = jQuery('input.input-radio:checked');
+    if(jQuery(seleccionado).attr('id') != 'payment_method_conektacard'){
+      /* This is because conekta form for credit cards, sends an error if none of their fields are completed, since you're not gonna use them in this option we can remove the div */
+      jQuery('.payment_method_conektacard').remove();
+    }
+    else{
+      if(firsTime){
+        /* If is the selected option, because we're assuming is not our default option, we show it */
+        event.preventDefault();
+        jQuery('.payment_method_conektacard').each(function(){
+          jQuery(this).show();
+        });
+        firsTime = false;
+      }
+      else{
+        if(!alreadyTokenize){
+          event.preventDefault();
+          var $form = jQuery(this);
+          jQuery('#place_order').prop('disabled', true);
+          return Conekta.token.create($form, conektaSuccessResponseHandler, conektaErrorResponseHandler);
+        }
+      }
+    }
+  });
+});
+
+
+
+var conektaSuccessResponseHandler = function(response){
+  alreadyTokenize = true;
+  jQuery('form.checkout').append(jQuery('<input type="hidden" name="conekta_token" />').val(response.id));
+  jQuery('#place_order').prop('disabled', false);
+  jQuery('input#place_order').click(); 
+  return true;
+};
+
+var conektaErrorResponseHandler = function(response){
+  alert(response.message);
+  jQuery('#place_order').prop('disabled', false);
+  return false;
+};
+</script>
+<!-- //NC FIX -->
+
+
+
+
 <div class="clear"></div>
 <span style="width: 100%; float: left; color: red;" class='payment-errors required'></span>
 <div class="form-row form-row-wide">
