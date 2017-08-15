@@ -32,9 +32,9 @@
     <label><?php echo esc_html($this->lang_options["year_options"]) ?><span class="required">*</span></label>
     <select id="card_expiration_yr" data-conekta="card[exp_year]" class="year" autocomplete="off">
               <option selected="selected" value=""> <?php echo esc_html($this->lang_options["year"]) ?></option>
-              <?php 
-              $start_year = (integer) date("Y"); 
-              $end_year = (integer) date("Y", strtotime("+10 years")); 
+              <?php
+              $start_year = (integer) date("Y");
+              $end_year = (integer) date("Y", strtotime("+10 years"));
               for($i = $start_year; $i <= $end_year; $i++): ?>
                 <option value="<?php echo $i; ?>"><?php echo $i; ?></option>
               <?php endfor; ?>
@@ -53,7 +53,7 @@
     <input id="conekta-card-cvc" class="input-text" type="text" maxlength="4" data-conekta="card[cvc]" value=""  style="border-radius:6px"/>
 </p>
 
-<?php if ($this->enablemeses): ?>
+<?php if ($this->enable_meses): ?>
 <p class="form-row form-row-last">
   <label><?php echo esc_html($this->lang_options["payment_type"]) ?><span class="required">*</span></label>
   <select id="monthly_installments" name="monthly_installments" autocomplete="off">
