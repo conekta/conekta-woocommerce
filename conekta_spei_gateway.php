@@ -10,38 +10,57 @@ if (!class_exists('Conekta')) {
 
 class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
 {
-    protected $GATEWAY_NAME               = "WC_Conekta_Spei_Gateway";
-    protected $usesandboxapi              = true;
-    protected $order                      = null;
-    protected $transactionId              = null;
-    protected $transactionErrorMessage    = null;
-    protected $conektaTestApiKey           = '';
-    protected $conektaLiveApiKey           = '';
-    protected $publishable_key            = '';
+    protected $GATEWAY_NAME              = "WC_Conekta_Spei_Gateway";
+    protected $use_sandbox_api           = true;
+    protected $order                     = null;
+    protected $transaction_id            = null;
+    protected $transaction_error_message = null;
+    protected $conekta_test_api_key      = '';
+    protected $conekta_live_api_key      = '';
+    protected $publishable_key           = '';
 
     public function __construct()
     {
         $this->id              = 'conektaspei';
-        $this->method_title       = __( 'Conekta Spei', 'woocommerce' );
+        $this->method_title    = __( 'Conekta Spei', 'woocommerce' );
         $this->has_fields      = true;
         $this->ckpg_init_form_fields();
         $this->init_settings();
-        $this->title              = $this->settings['title'];
-        $this->description        = '';
-        $this->icon           = $this->settings['alternate_imageurl'] ? $this->settings['alternate_imageurl']  : WP_PLUGIN_URL . "/" . plugin_basename( dirname(__FILE__)) . '/images/spei.png';
-        $this->usesandboxapi      = strcmp($this->settings['debug'], 'yes') == 0;
-        $this->testApiKey       = $this->settings['test_api_key'  ];
-        $this->liveApiKey       = $this->settings['live_api_key'  ];
-        $this->account_owner      = $this->settings['account_owner'];
-        $this->secret_key         = $this->usesandboxapi ? $this->testApiKey : $this->liveApiKey;
+        $this->title           = $this->settings['title'];
+        $this->description     = '';
+        $this->icon            = $this->settings['alternate_imageurl'] ?
+                                 $this->settings['alternate_imageurl']  :
+                                 WP_PLUGIN_URL . "/" . plugin_basename( dirname(__FILE__)) . '/images/spei.png';
+        $this->use_sandbox_api = strcmp($this->settings['debug'], 'yes') == 0;
+        $this->test_api_key    = $this->settings['test_api_key'  ];
+        $this->live_api_key    = $this->settings['live_api_key'  ];
+        $this->account_owner   = $this->settings['account_owner'];
+        $this->secret_key      = $this->use_sandbox_api ?
+                                 $this->test_api_key :
+                                 $this->live_api_key;
 
-        $this->lang_options = parent::ckpg_set_locale_options()->ckpg_get_lang_options();  
+        $this->lang_options = parent::ckpg_set_locale_options()->ckpg_get_lang_options();
 
-        add_action('woocommerce_update_options_payment_gateways_' . $this->id , array($this, 'process_admin_options'));
-        add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'ckpg_thankyou_page' ) );
-        add_action( 'woocommerce_email_before_order_table', array( $this, 'ckpg_email_reference' ) );
-        add_action( 'woocommerce_email_before_order_table', array( $this, 'ckpg_email_instructions' ) );
-        add_action( 'woocommerce_api_' . strtolower( get_class( $this ) ), array( $this, 'ckpg_webhook_handler' ) );
+        add_action(
+            'woocommerce_update_options_payment_gateways_' . $this->id ,
+            array($this, 'process_admin_options')
+        );
+        add_action(
+            'woocommerce_thankyou_' . $this->id,
+            array( $this, 'ckpg_thankyou_page')
+        );
+        add_action(
+            'woocommerce_email_before_order_table',
+            array($this, 'ckpg_email_reference')
+        );
+        add_action(
+            'woocommerce_email_before_order_table',
+            array($this, 'ckpg_email_instructions')
+        );
+        add_action(
+            'woocommerce_api_' . strtolower(get_class($this)),
+            array($this, 'ckpg_webhook_handler')
+        );
     }
 
     /**
@@ -59,7 +78,8 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
         $paid_at       = date("Y-m-d", $charge['paid_at']);
         $order         = new WC_Order($order_id);
 
-        if (strpos($event['type'], "order.paid") !== false && $charge['payment_method']['type'] === "spei")
+        if (strpos($event['type'], "order.paid") !== false
+            && $charge['payment_method']['type'] === "spei")
             {
                 update_post_meta( $order->id, 'conekta-paid-at', $paid_at);
                 $order->payment_complete();
@@ -149,7 +169,8 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
 
         if (get_post_meta( $order->id, 'conekta-clabe', true ) != null)
             {
-                echo '<p><strong>'.esc_html(__('Clabe')).':</strong> ' . get_post_meta( esc_html($order->id), 'conekta-clabe', true ). '</p>';
+                echo '<p><strong>'.esc_html(__('Clabe')).':</strong> '
+                . get_post_meta( esc_html($order->id), 'conekta-clabe', true ). '</p>';
             }
     }
 
@@ -184,10 +205,11 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
         include_once('conekta_gateway_helper.php');
         \Conekta\Conekta::setApiKey($this->secret_key);
         \Conekta\Conekta::setApiVersion('2.0.0');
-        \Conekta\Conekta::setPlugin('WooCommerce');
+        \Conekta\Conekta::setPlugin($this->name);
+        \Conekta\Conekta::setPluginVersion($this->version);
         \Conekta\Conekta::setLocale('es');
 
-        $data             = ckpg_getRequestData($this->order);
+        $data             = ckpg_get_request_data($this->order);
         $amount           = $data['amount'];
         $items            = $this->order->get_items();
         $taxes            = $this->order->get_taxes();
@@ -234,11 +256,11 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
             );
 
             $charge              = $order->createCharge($charge_details);
-            $this->transactionId = $charge->id;
+            $this->transaction_id = $charge->id;
 
             update_post_meta( $this->order->id, 'conekta-id', $charge->id );
             update_post_meta( $this->order->id, 'conekta-creado', $charge->created_at );
-            update_post_meta( $this->order->id, 'conekta-expira', $charge->payment_method->expiry_date );
+            update_post_meta( $this->order->id, 'conekta-expira', $charge->payment_method->expires_at );
             update_post_meta( $this->order->id, 'conekta-clabe', $charge->payment_method->clabe );
             return true;
         } catch(\Conekta\Handler $e) {
@@ -275,7 +297,7 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
             }
         else
             {
-                $this->ckpg_markAsFailedPayment();
+                $this->ckpg_mark_as_failed_payment();
                 global $wp_version;
                 if (version_compare($wp_version, '4.1', '>=')) {
                     wc_add_notice(__('Transaction Error: Could not complete the payment', 'woothemes'), $notice_type = 'error');
@@ -285,18 +307,18 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
             }
     }
 
-    protected function ckpg_markAsFailedPayment()
+    protected function ckpg_mark_as_failed_payment()
     {
         $this->order->add_order_note(
             sprintf(
                 "%s Spei Payment Failed : '%s'",
                 $this->GATEWAY_NAME,
-                $this->transactionErrorMessage
+                $this->transaction_error_message
             )
         );
     }
 
-    protected function ckpg_completeOrder()
+    protected function ckpg_complete_order()
     {
         global $woocommerce;
 
@@ -309,7 +331,7 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
             sprintf(
                 "%s payment completed with Transaction Id of '%s'",
                 $this->GATEWAY_NAME,
-                $this->transactionId
+                $this->transaction_id
             )
         );
 
@@ -321,14 +343,14 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
 function ckpg_conekta_spei_order_status_completed($order_id = null)
 {
     global $woocommerce;
-    if (!$order_id){   
+    if (!$order_id){
         $order_id = sanitize_text_field((string) $_POST['order_id']);
     }
 
     $data = get_post_meta( $order_id );
     $total = $data['_order_total'][0] * 100;
 
-    $params = array(); 
+    $params = array();
     $amount = floatval($_POST['amount']);
     if(isset($amount))
     {

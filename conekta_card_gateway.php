@@ -11,13 +11,13 @@ if (!class_exists('Conekta')) {
 */
 class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
 {
-    protected $GATEWAY_NAME            = "WC_Conekta_Card_Gateway";
-    protected $is_sandbox              = true;
-    protected $order                   = null;
-    protected $transaction_id          = null;
-    protected $conektaOrderId          = null;
-    protected $transactionErrorMessage = null;
-    protected $currencies              = array('MXN', 'USD');
+    protected $GATEWAY_NAME              = "WC_Conekta_Card_Gateway";
+    protected $is_sandbox                = true;
+    protected $order                     = null;
+    protected $transaction_id            = null;
+    protected $conekta_order_id          = null;
+    protected $transaction_error_message = null;
+    protected $currencies                = array('MXN', 'USD');
 
     public function __construct() {
         $this->id = 'conektacard';
@@ -29,24 +29,34 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
 
         $this->title       = $this->settings['title'];
         $this->description = '';
-        $this->icon        = $this->settings['alternate_imageurl'] ? $this->settings['alternate_imageurl']  : WP_PLUGIN_URL . "/" . plugin_basename( dirname(__FILE__)) . '/images/credits.png'; 
+        $this->icon        = $this->settings['alternate_imageurl'] ?
+                             $this->settings['alternate_imageurl'] :
+                             WP_PLUGIN_URL . "/" . plugin_basename( dirname(__FILE__))
+                             . '/images/credits.png';
 
-        $this->usesandboxapi      = strcmp($this->settings['debug'], 'yes') == 0;
-        $this->enablemeses        = strcmp($this->settings['meses'], 'yes') == 0;
-        $this->testApiKey         = $this->settings['test_api_key'];
-        $this->liveApiKey         = $this->settings['live_api_key'];
-        $this->testPublishableKey = $this->settings['test_publishable_key'];
-        $this->livePublishableKey = $this->settings['live_publishable_key'];
-        $this->publishable_key    = $this->usesandboxapi ? $this->testPublishableKey : $this->livePublishableKey;
-        $this->secret_key         = $this->usesandboxapi ? $this->testApiKey : $this->liveApiKey;
-
-        $this->lang_options = parent::ckpg_set_locale_options()->ckpg_get_lang_options();  
+        $this->use_sandbox_api      = strcmp($this->settings['debug'], 'yes') == 0;
+        $this->enable_meses         = strcmp($this->settings['meses'], 'yes') == 0;
+        $this->test_api_key         = $this->settings['test_api_key'];
+        $this->live_api_key         = $this->settings['live_api_key'];
+        $this->test_publishable_key = $this->settings['test_publishable_key'];
+        $this->live_publishable_key = $this->settings['live_publishable_key'];
+        $this->publishable_key      = $this->use_sandbox_api ?
+                                      $this->test_publishable_key :
+                                      $this->live_publishable_key;
+        $this->secret_key           = $this->use_sandbox_api ?
+                                      $this->test_api_key :
+                                      $this->live_api_key;
+        $this->lang_options         = parent::ckpg_set_locale_options()->
+                                    ckpg_get_lang_options();
 
         add_action('wp_enqueue_scripts', array($this, 'ckpg_payment_fields'));
-        add_action('woocommerce_update_options_payment_gateways_'.$this->id, array($this, 'process_admin_options'));
+        add_action(
+          'woocommerce_update_options_payment_gateways_'.$this->id,
+          array($this, 'process_admin_options')
+        );
         add_action('admin_notices', array(&$this, 'ckpg_perform_ssl_check'));
 
-        if (!$this->ckpg_validateCurrency()) {
+        if (!$this->ckpg_validate_currency()) {
             $this->enabled = false;
         }
 
@@ -56,16 +66,26 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
     }
 
     /**
-    * Checks to see if SSL is configured and if plugin is configured in production mode 
-    * Forces use of SSL if not in testing 
-    */ 
+    * Checks to see if SSL is configured and if plugin is configured in production mode
+    * Forces use of SSL if not in testing
+    */
     public function ckpg_perform_ssl_check()
     {
-        if (!$this->usesandboxapi && get_option('woocommerce_force_ssl_checkout') == 'no' && $this->enabled == 'yes') {
-            echo '<div class="error"><p>'.sprintf(__('%s sandbox testing is disabled and can performe live transactions but the <a href="%s">force SSL option</a> is disabled; your checkout is not secure! Please enable SSL and ensure your server has a valid SSL certificate.', 'woothemes'), $this->GATEWAY_NAME, admin_url('admin.php?page=settings')).'</p></div>';
+        if (!$this->use_sandbox_api
+          && get_option('woocommerce_force_ssl_checkout') == 'no'
+          && $this->enabled == 'yes') {
+            echo '<div class="error"><p>'
+              .sprintf(
+                __('%s sandbox testing is disabled and can performe live transactions'
+                .' but the <a href="%s">force SSL option</a> is disabled; your checkout'
+                .' is not secure! Please enable SSL and ensure your server has a valid SSL'
+                .' certificate.', 'woothemes'),
+                $this->GATEWAY_NAME, admin_url('admin.php?page=settings')
+              )
+            .'</p></div>';
         }
     }
-    
+
     public function ckpg_init_form_fields()
     {
         $this->form_fields = array(
@@ -153,13 +173,14 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
         include_once('conekta_gateway_helper.php');
         \Conekta\Conekta::setApiKey($this->secret_key);
         \Conekta\Conekta::setApiVersion('2.0.0');
-        \Conekta\Conekta::setPlugin('WooCommerce');
+        \Conekta\Conekta::setPlugin($this->name);
+        \Conekta\Conekta::setPluginVersion($this->version);
         \Conekta\Conekta::setLocale('es');
 
 
 
         //ALL $data VAR ASSIGNATION IS FREE OF VALIDATION
-        $data             = ckpg_getRequestData($this->order);
+        $data             = ckpg_get_request_data($this->order);
         $amount           = $data['amount'];
         $items            = $this->order->get_items();
         $taxes            = $this->order->get_taxes();
@@ -198,7 +219,7 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
             } else {
                 $order = \Conekta\Order::create($order_details);
             }
-            //ORDER ID IS GENERATED BY RESPONSE 
+            //ORDER ID IS GENERATED BY RESPONSE
             update_post_meta($this->order->id, 'conekta-order-id', $order->id);
 
             $charge_details = array(
@@ -216,11 +237,11 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
 
             $charge = $order->createCharge($charge_details);
 
-            $this->transactionId = $charge->id;
+            $this->transaction_id = $charge->id;
             if ($data['monthly_installments'] > 1) {
                 update_post_meta( $this->order->id, 'meses-sin-intereses', $data['monthly_installments']);
             }
-            update_post_meta( $this->order->id, 'transaction_id', $this->transactionId);
+            update_post_meta( $this->order->id, 'transaction_id', $this->transaction_id);
             return true;
 
         } catch(\Conekta\Handler $e) {
@@ -236,13 +257,13 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
         }
     }
 
-    protected function ckpg_markAsFailedPayment()
+    protected function ckpg_mark_as_failed_payment()
     {
         $this->order->add_order_note(
          sprintf(
              "%s Credit Card Payment Failed : '%s'",
              $this->GATEWAY_NAME,
-             $this->transactionErrorMessage
+             $this->transaction_error_message
              )
          );
     }
@@ -262,7 +283,7 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
            sprintf(
                "%s payment completed with Transaction Id of '%s'",
                $this->GATEWAY_NAME,
-               $this->transactionId
+               $this->transaction_id
                )
            );
 
@@ -285,12 +306,8 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
         }
         else
         {
-            $this->ckpg_markAsFailedPayment();
+            $this->ckpg_mark_as_failed_payment();
         }
-    }
-
-    public function createCharge($customer, $charge_request) {
-
     }
 
     /**
@@ -299,11 +316,11 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
      * @access public
      * @return bool
      */
-    public function ckpg_validateCurrency() {
+    public function ckpg_validate_currency() {
         return in_array(get_woocommerce_currency(), $this->currencies);
     }
 
-    public function ckpg_isNullOrEmptyString($string) {
+    public function ckpg_is_null_or_empty_string($string) {
         return (!isset($string) || trim($string) === '');
     }
 }
