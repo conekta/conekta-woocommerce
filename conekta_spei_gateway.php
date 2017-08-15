@@ -34,6 +34,9 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
         $this->liveApiKey       = $this->settings['live_api_key'  ];
         $this->account_owner      = $this->settings['account_owner'];
         $this->secret_key         = $this->usesandboxapi ? $this->testApiKey : $this->liveApiKey;
+
+        $this->lang_options = parent::ckpg_set_locale_options()->ckpg_get_lang_options();  
+
         add_action('woocommerce_update_options_payment_gateways_' . $this->id , array($this, 'process_admin_options'));
         add_action( 'woocommerce_thankyou_' . $this->id, array( $this, 'ckpg_thankyou_page' ) );
         add_action( 'woocommerce_email_before_order_table', array( $this, 'ckpg_email_reference' ) );

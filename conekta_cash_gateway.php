@@ -34,6 +34,8 @@ class WC_Conekta_Cash_Gateway extends WC_Conekta_Plugin
         $this->liveApiKey         = $this->settings['live_api_key'];
         $this->secret_key         = $this->usesandboxapi ? $this->testApiKey : $this->liveApiKey;
 
+        $this->lang_options = parent::ckpg_set_locale_options()->ckpg_get_lang_options();  
+
         if (empty($this->secret_key)){
             $this->enabled = false;
         }

@@ -27,5 +27,7 @@
 		"payment_type" => "Payment type",
 		"month" => "Month",
 		"year" => "Year",
-		"single_payment" => "Single payment"
+		"single_payment" => "Single payment",
+		"spei" => "Please make your payment in the bank website using the pay ticket. Click to generate your reference ticket payment",
+		"oxxo" => "Please make your pay in the nearest OXXO using the payment ticket. Click to generate your reference ticket payment"
 	);

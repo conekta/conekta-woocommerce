@@ -9,4 +9,4 @@
 
 
 <span class='payment-errors required'></span>
-Por favor realiza el pago el portal de tu banco utilizando la ficha de pago. Dale clic para generar la ficha de pago.
+<?php  _e($this->lang_options['spei']); ?>
