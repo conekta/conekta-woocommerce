@@ -83,7 +83,7 @@ class WC_Conekta_Cash_Gateway extends WC_Conekta_Plugin
         if (strpos($event['type'], "order.paid") !== false
             && $charge['payment_method']['type'] === "oxxo")
             {
-                update_post_meta($order->id, 'conekta-paid-at', $paid_at);
+                update_post_meta($order->get_id(), 'conekta-paid-at', $paid_at);
                 $order->payment_complete();
                 $order->add_order_note(sprintf("Payment completed in Oxxo and notification of payment received"));
 
@@ -159,7 +159,7 @@ class WC_Conekta_Cash_Gateway extends WC_Conekta_Plugin
     function ckpg_thankyou_page($order_id) {
         $order = new WC_Order( $order_id );
 
-        echo '<p style="font-size: 30px"><strong>'.__('Referencia').':</strong> ' . get_post_meta( esc_html($order->id), 'conekta-referencia', true ). '</p>';
+        echo '<p style="font-size: 30px"><strong>'.__('Referencia').':</strong> ' . get_post_meta( esc_html($order->get_id()), 'conekta-referencia', true ). '</p>';
         echo '<p>OXXO cobrará una comisión adicional al momento de realizar el pago.</p>';
                 echo '<p>INSTRUCCIONES:<ol><li>Acude a la tienda OXXO más cercana.</li><li>Inidica en caja que quieres realizar un pago de <b>OXXOPay</b>.</li><li>Dicta al cajero el número de referencia en esta ficha para que la tecleé directamente en la pantalla de venta.</li><li>Realiza el pago correspondiente con dinero en efectivo.</li><li>Al confirmar tu pago, el cajero te entregará un comprobante impreso. <b>En él podrás verificar que se haya realizado correctamente</b>. Conserva este comprobante de pago.</li></ol>';
 
@@ -173,9 +173,9 @@ class WC_Conekta_Cash_Gateway extends WC_Conekta_Plugin
      */
 
     function ckpg_email_reference($order) {
-        if (get_post_meta( $order->id, 'conekta-referencia', true ) != null)
+        if (get_post_meta( $order->get_id(), 'conekta-referencia', true ) != null)
             {
-                echo '<p style="font-size: 30px"><strong>'.__('Referencia').':</strong> ' . get_post_meta( $order->id, 'conekta-referencia', true ). '</p>';
+                echo '<p style="font-size: 30px"><strong>'.__('Referencia').':</strong> ' . get_post_meta( $order->get_id(), 'conekta-referencia', true ). '</p>';
                 echo '<p>OXXO cobrará una comisión adicional al momento de realizar el pago.</p>';
                 echo '<p>INSTRUCCIONES:<ol><li>Acude a la tienda OXXO más cercana.</li><li>Inidica en caja que quieres realizar un pago de <b>OXXOPay</b>.</li><li>Dicta al cajero el número de referencia en esta ficha para que la tecleé directamente en la pantalla de venta.</li><li>Realiza el pago correspondiente con dinero en efectivo.</li><li>Al confirmar tu pago, el cajero te entregará un comprobante impreso. <b>En él podrás verificar que se haya realizado correctamente</b>. Conserva este comprobante de pago.</li></ol>';
             }
@@ -190,9 +190,9 @@ class WC_Conekta_Cash_Gateway extends WC_Conekta_Plugin
      * @param bool $plain_text
      */
     public function ckpg_email_instructions( $order, $sent_to_admin = false, $plain_text = false ) {
-        if (get_post_meta( $order->id, '_payment_method', true ) === $this->id){
+        if (get_post_meta( $order->get_id(), '_payment_method', true ) === $this->id){
             $instructions = $this->form_fields['instructions'];
-            if ( $instructions && 'on-hold' === $order->status ) {
+            if ( $instructions && 'on-hold' === $order->get_status() ) {
                 echo wpautop( wptexturize( $instructions['default'] ) ) . PHP_EOL;
             }
         }
@@ -249,7 +249,7 @@ class WC_Conekta_Cash_Gateway extends WC_Conekta_Plugin
         $order_details = ckpg_check_balance($order_details, $amount);
 
         try {
-            $conekta_order_id = get_post_meta($this->order->id, 'conekta-order-id', true);
+            $conekta_order_id = get_post_meta($this->order->get_id(), 'conekta-order-id', true);
             if (!empty($conekta_order_id)) {
                 $order = \Conekta\Order::find($conekta_order_id);
                 $order->update($order_details);
@@ -257,7 +257,7 @@ class WC_Conekta_Cash_Gateway extends WC_Conekta_Plugin
                 $order = \Conekta\Order::create($order_details);
             }
 
-            update_post_meta($this->order->id, 'conekta-order-id', $order->id);
+            update_post_meta($this->order->get_id(), 'conekta-order-id', $order->id);
 
             $expires_at = time() + ($this->settings['expiration_days'] * 86400);
             $charge_details = array(
@@ -271,10 +271,10 @@ class WC_Conekta_Cash_Gateway extends WC_Conekta_Plugin
             $charge = $order->createCharge($charge_details);
 
             $this->transaction_id = $charge->id;
-            update_post_meta($this->order->id, 'conekta-id',         $charge->id);
-            update_post_meta($this->order->id, 'conekta-creado',     $charge->created_at);
-            update_post_meta($this->order->id, 'conekta-expira',     $charge->payment_method->expires_at);
-            update_post_meta($this->order->id, 'conekta-referencia', $charge->payment_method->reference);
+            update_post_meta($this->order->get_id(), 'conekta-id',         $charge->id);
+            update_post_meta($this->order->get_id(), 'conekta-creado',     $charge->created_at);
+            update_post_meta($this->order->get_id(), 'conekta-expira',     $charge->payment_method->expires_at);
+            update_post_meta($this->order->get_id(), 'conekta-referencia', $charge->payment_method->reference);
 
             return true;
         } catch(\Conekta\Handler $e) {
@@ -298,7 +298,7 @@ class WC_Conekta_Cash_Gateway extends WC_Conekta_Plugin
         if ($this->ckpg_send_to_conekta())
             {
                 // Mark as on-hold (we're awaiting the notification of payment)
-                $this->order->update_status('on-hold', __( 'Awaiting the conekta OXOO payment', 'woocommerce' ));
+                $this->order->update_status('on-hold', __( 'Awaiting the conekta OXXO payment', 'woocommerce' ));
 
                 // Remove cart
                 $woocommerce->cart->empty_cart();
@@ -336,7 +336,7 @@ class WC_Conekta_Cash_Gateway extends WC_Conekta_Plugin
     {
         global $woocommerce;
 
-        if ($this->order->status == 'completed')
+        if ($this->order->get_status() == 'completed')
             return;
 
         $this->order->payment_complete();

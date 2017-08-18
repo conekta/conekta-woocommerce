@@ -81,7 +81,7 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
         if (strpos($event['type'], "order.paid") !== false
             && $charge['payment_method']['type'] === "spei")
             {
-                update_post_meta( $order->id, 'conekta-paid-at', $paid_at);
+                update_post_meta( $order->get_id(), 'conekta-paid-at', $paid_at);
                 $order->payment_complete();
                 $order->add_order_note(sprintf("Payment completed in Spei and notification of payment received"));
 
@@ -154,7 +154,7 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
      */
     function ckpg_thankyou_page($order_id) {
         $order = new WC_Order( $order_id );
-        echo '<p><strong>'.__('Clabe').':</strong> ' . get_post_meta( esc_html($order->id), 'conekta-clabe', true ). '</p>';
+        echo '<p><strong>'.__('Clabe').':</strong> ' . get_post_meta( esc_html($order->get_id()), 'conekta-clabe', true ). '</p>';
         echo '<p><strong>'.esc_html(__('Beneficiario')).':</strong> '.$this->account_owner.'</p>';
         echo '<p><strong>'.esc_html(__('Banco Receptor')).':</strong>  Sistema de Transferencias y Pagos (STP)</p>';
     }
@@ -167,10 +167,10 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
      */
     function ckpg_email_reference($order) {
 
-        if (get_post_meta( $order->id, 'conekta-clabe', true ) != null)
+        if (get_post_meta( $order->get_id(), 'conekta-clabe', true ) != null)
             {
                 echo '<p><strong>'.esc_html(__('Clabe')).':</strong> '
-                . get_post_meta( esc_html($order->id), 'conekta-clabe', true ). '</p>';
+                . get_post_meta( esc_html($order->get_id()), 'conekta-clabe', true ). '</p>';
             }
     }
 
@@ -184,7 +184,7 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
      */
     public function ckpg_email_instructions( $order, $sent_to_admin = false, $plain_text = false ) {
         $instructions = $this->form_fields['instructions'];
-        if ( $instructions && 'on-hold' === $order->status ) {
+        if ( $instructions && 'on-hold' === $order->get_status() ) {
             echo wpautop( wptexturize( $instructions['default'] ) ) . PHP_EOL;
         }
     }
@@ -240,7 +240,7 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
         $order_details = ckpg_check_balance($order_details, $amount);
 
         try {
-            $conekta_order_id = get_post_meta($this->order->id, 'conekta-order-id', true);
+            $conekta_order_id = get_post_meta($this->order->get_id(), 'conekta-order-id', true);
             if (!empty($conekta_order_id)) {
                 $order = \Conekta\Order::find($conekta_order_id);
                 $order->update($order_details);
@@ -248,20 +248,20 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
                 $order = \Conekta\Order::create($order_details);
             }
 
-            update_post_meta($this->order->id, 'conekta-order-id', $order->id);
+            update_post_meta($this->order->get_id(), 'conekta-order-id', $order->id);
 
             $charge_details = array(
                 'payment_method' => array('type' => 'spei'),
                 'amount'         => $amount
             );
 
-            $charge              = $order->createCharge($charge_details);
+            $charge               = $order->createCharge($charge_details);
             $this->transaction_id = $charge->id;
 
-            update_post_meta( $this->order->id, 'conekta-id', $charge->id );
-            update_post_meta( $this->order->id, 'conekta-creado', $charge->created_at );
-            update_post_meta( $this->order->id, 'conekta-expira', $charge->payment_method->expires_at );
-            update_post_meta( $this->order->id, 'conekta-clabe', $charge->payment_method->clabe );
+            update_post_meta( $this->order->get_id(), 'conekta-id', $charge->id );
+            update_post_meta( $this->order->get_id(), 'conekta-creado', $charge->created_at );
+            update_post_meta( $this->order->get_id(), 'conekta-expira', $charge->payment_method->expires_at );
+            update_post_meta( $this->order->get_id(), 'conekta-clabe', $charge->payment_method->clabe );
             return true;
         } catch(\Conekta\Handler $e) {
             $description = $e->getMessage();
@@ -284,7 +284,7 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
         if ($this->ckpg_send_to_conekta())
             {
                 // Mark as on-hold (we're awaiting the notification of payment)
-                $this->order->update_status('on-hold', __( 'Awaiting the conekta OXOO payment', 'woocommerce' ));
+                $this->order->update_status('on-hold', __( 'Awaiting the conekta SPEI payment', 'woocommerce' ));
 
                 // Remove cart
                 $woocommerce->cart->empty_cart();
@@ -322,7 +322,7 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
     {
         global $woocommerce;
 
-        if ($this->order->status == 'completed')
+        if ($this->order->get_status() == 'completed')
             return;
 
         $this->order->payment_complete();

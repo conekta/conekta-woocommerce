@@ -65,7 +65,7 @@ class WC_Conekta_Plugin extends WC_Payment_Gateway
       	$mail_customer = $woocommerce->mailer();
       	$message = $mail_customer->wrap_message(
         sprintf(__('Hola, %s'), $customer), $body_message);
-     	  $mail_customer->send($order->billing_email, $title, $message);
+     	  $mail_customer->send($order->get_billing_email(), $title, $message);
      	  unset($mail_customer);
      	  //Email for admin site
      	  $mail_admin = $woocommerce->mailer();

@@ -66,13 +66,13 @@ function ckpg_build_line_items($items, $version)
 
     foreach ($items as $item) {
 
-        $sub_total    = floatval($item['line_subtotal']) * 1000;
-        $sub_total    = $sub_total / floatval($item['qty']);
+        $sub_total   = floatval($item['line_subtotal']) * 1000;
+        $sub_total   = $sub_total / floatval($item['qty']);
         $productmeta = new WC_Product($item['product_id']);
         $sku         = $productmeta->get_sku();
         $unit_price  = $sub_total;
-        $item_name    = item_name_validation($item['name']);
-        $unit_price   = intval(round(floatval($unit_price) / 10), 2);
+        $item_name   = item_name_validation($item['name']);
+        $unit_price  = intval(round(floatval($unit_price) / 10), 2);
         $quantity    = intval($item['qty']);
 
 
@@ -218,18 +218,18 @@ function ckpg_get_request_data($order)
             );
 
             //PARAM VALIDATION
-            $name      = string_validation($order->shipping_first_name);
-            $last      = string_validation($order->shipping_last_name);
-            $address1  = string_validation($order->shipping_address_1);
-            $address2  = string_validation($order->shipping_address_2);
-            $city      = string_validation($order->shipping_city);
-            $state     = string_validation($order->shipping_state);
-            $country   = string_validation($order->shipping_country);
-            $postal    = post_code_validation($order->shipping_postcode);
+            $name      = string_validation($order->get_shipping_first_name());
+            $last      = string_validation($order->get_shipping_last_name());
+            $address1  = string_validation($order->get_shipping_address_1());
+            $address2  = string_validation($order->get_shipping_address_2());
+            $city      = string_validation($order->get_shipping_city());
+            $state     = string_validation($order->get_shipping_state());
+            $country   = string_validation($order->get_shipping_country());
+            $postal    = post_code_validation($order->get_shipping_postcode());
 
 
             $shipping_contact = array(
-            'phone'    => $order->billing_phone,
+            'phone'    => $order->get_billing_phone(),
             'receiver' => sprintf('%s %s', $name, $last),
             'address' => array(
                 'street1'     => $address1,
@@ -251,14 +251,14 @@ function ckpg_get_request_data($order)
         }
 
          //PARAM VALIDATION
-        $customer_name = sprintf('%s %s', $order->billing_first_name, $order->billing_last_name);
-        $phone         = sanitize_text_field($order->billing_phone);
+        $customer_name = sprintf('%s %s', $order->get_billing_first_name(), $order->get_billing_last_name());
+        $phone         = sanitize_text_field($order->get_billing_phone());
 
         // Customer Info
         $customer_info = array(
             'name'  => $customer_name,
             'phone' => $phone,
-            'email' => $order->billing_email
+            'email' => $order->get_billing_email()
         );
         //PARAMS VALIDATION
         if (!empty($_POST['conekta_token'])) {
@@ -273,22 +273,22 @@ function ckpg_get_request_data($order)
         $currency             = get_woocommerce_currency();
 
         $data = array(
-            'order_id'             => $order->id,
+            'order_id'             => $order->get_id(),
             'amount'               => $amount,
             'token'                => $token,
             'monthly_installments' => $monthly_installments,
             'currency'             => $currency,
-            'description'          => sprintf('Charge for %s', $order->billing_email),
+            'description'          => sprintf('Charge for %s', $order->get_billing_email()),
             'customer_info'        => $customer_info,
             'shipping_lines'       => $shipping_lines
         );
 
-        if (!empty($order->shipping_address_1)) {
+        if (!empty($order->get_shipping_address_1())) {
             $data = array_merge($data, array('shipping_contact' => $shipping_contact));
         }
 
-        if (!empty($order->customer_message)) {
-            $data = array_merge($data, array('customer_message' => $order->customer_message));
+        if (!empty($order->get_customer_note())) {
+            $data = array_merge($data, array('customer_message' => $order->get_customer_note()));
         }
 
         if(!empty($discount_lines)) {
