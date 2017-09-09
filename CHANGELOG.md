@@ -1,6 +1,24 @@
+## [3.0.1](https://github.com/conekta/conekta-woocommerce/releases/tag/v3.0.1) - 2017-09-09
+## Changed
+- Bundle CA Root Certificates
+
+## [3.0.0](https://github.com/conekta/conekta-woocommerce/releases/tag/v3.0.0) - 2017-08-21
+## Feature
+- Compatibility with WooCommerce 3
+- Correction in access to order properties
+
+## Notes
+If you have WooCommerce 2.x, you can view this branch with latest stable version [2.0.14](https://github.com/conekta/conekta-woocommerce/tree/feature/woocommerce-2)
+
 ## [2.0.14](https://github.com/conekta/conekta-woocommerce/releases/tag/v2.0.14) - 2017-08-03
 ### Fix
 - HotFix include email in order
+- Error typo OXOO 
+
+### Changed
+- Bundle CA Root Certificates
+- Update PHP Library
+
 
 ## [2.0.13](https://github.com/conekta/conekta-woocommerce/releases/tag/v.2.0.13) - 2017-07-13
 ### Feature

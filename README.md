@@ -1,4 +1,4 @@
-Conekta Woocommerce v.1.0.0 Beta
+Conekta Woocommerce v.3.0.1 Beta
 ================================
 
 WooCommerce Payment Gateway for Conekta.io
