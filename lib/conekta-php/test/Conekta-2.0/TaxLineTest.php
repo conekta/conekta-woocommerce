@@ -1,19 +1,9 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
+namespace Conekta;
 
-require_once dirname(__FILE__).'/../../lib/Conekta.php';
-
-class TaxLineTest extends TestCase
+class TaxLineTest extends BaseTest
 {
-  function setApiKey()
-  {
-    $apiEnvKey = getenv('CONEKTA_API');
-    if (!$apiEnvKey) {
-      $apiEnvKey = '1tv5yJp3xnVZ7eK67m4h';
-    }
-    \Conekta\Conekta::setApiKey($apiEnvKey);
-  }   
   public static $validOrder =
   array(
     'line_items' => array(
@@ -43,7 +33,7 @@ class TaxLineTest extends TestCase
   public function testSuccessfulTaxLineDelete()
   {
     $this->setApiKey();
-    $order = \Conekta\Order::create(self::$validOrder);
+    $order = Order::create(self::$validOrder);
     $taxLine = $order->tax_lines[0];
     $taxLine->delete();
     $this->assertTrue($taxLine->deleted == true);
@@ -52,7 +42,7 @@ class TaxLineTest extends TestCase
   public function testSuccessfulTaxLineUpdate()
   {
     $this->setApiKey();
-    $order = \Conekta\Order::create(self::$validOrder);
+    $order = Order::create(self::$validOrder);
     $taxLine = $order->tax_lines[0];
     $taxLine->update(array('amount' => 10));
     $this->assertTrue($taxLine->amount == 10);
@@ -61,11 +51,11 @@ class TaxLineTest extends TestCase
   public function testUnsuccessfulTaxLineUpdate()
   {
     $this->setApiKey();
-    $order = \Conekta\Order::create(self::$validOrder);
+    $order = Order::create(self::$validOrder);
     $taxLine = $order->tax_lines[0];
     try {
       $taxLine->update(array('amount' => -1));
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
       $this->assertTrue(strpos(get_class($e), 'ParameterValidationError') == true);
     }
   }

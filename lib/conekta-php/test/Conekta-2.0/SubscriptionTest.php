@@ -1,18 +1,9 @@
 <?php 
-use PHPUnit\Framework\TestCase;
 
-require_once dirname(__FILE__).'/../../lib/Conekta.php';
+namespace Conekta;
 
-class SubscriptionTest extends TestCase
+class SubscriptionTest extends BaseTest
 {
-  function setApiKey()
-  {
-    $apiEnvKey = getenv('CONEKTA_API');
-    if (!$apiEnvKey) {
-      $apiEnvKey = '1tv5yJp3xnVZ7eK67m4h';
-    }
-    \Conekta\Conekta::setApiKey($apiEnvKey);
-  }
   public static $validCustomer = array(
         'email' => 'hola@hola.com',
         'name'  => 'John Constantine'
@@ -22,7 +13,7 @@ class SubscriptionTest extends TestCase
   public function testSuccesfulSubscriptionCreate()
   {
     $this->setApiKey();
-    $customer = \Conekta\Customer::create(self::$validCustomer);
+    $customer = Customer::create(self::$validCustomer);
     $customer->createPaymentSource(self::$validVisaCard);
     $subscription = $customer->createSubscription(array('plan' => 'gold-plan'));
     $this->assertTrue(strpos(get_class($subscription), 'Conekta\Subscription') !== false);
@@ -31,13 +22,13 @@ class SubscriptionTest extends TestCase
   public function testSuccesfulSubscriptionUpdate()
   {
     $this->setApiKey();
-    $customer = \Conekta\Customer::create(self::$validCustomer);
+    $customer = Customer::create(self::$validCustomer);
     $customer->createPaymentSource(self::$validVisaCard);
     $subscription = $customer->createSubscription(array('plan' => 'gold-plan'));
     try {
-      $plan = \Conekta\Plan::find('gold-plan2');
-    } catch (Exception $e) {
-      $plan = \Conekta\Plan::create(array(
+      $plan = Plan::find('gold-plan2');
+    } catch (\Exception $e) {
+      $plan = Plan::create(array(
         'id'                => 'gold-plan2',
         'name'              => 'Gold Plan',
         'amount'            => 10000,
@@ -56,12 +47,12 @@ class SubscriptionTest extends TestCase
   public function testUnsuccesfulSubscriptionCreate()
   {
     $this->setApiKey();
-    $customer = \Conekta\Customer::create(self::$validCustomer);
+    $customer = Customer::create(self::$validCustomer);
     $customer->createPaymentSource(self::$validVisaCard);
     try {
       $subscription = $customer->createSubscription(array(
         'plan' => 'unexistent-plan', ));
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
       $this->assertTrue(strpos($e->getMessage(), 'El recurso no ha sido encontrado') !== false);
     }
   }
@@ -69,7 +60,7 @@ class SubscriptionTest extends TestCase
   public function testSuccesfulSubscriptionPause()
   {
     $this->setApiKey();
-    $customer = \Conekta\Customer::create(self::$validCustomer);
+    $customer = Customer::create(self::$validCustomer);
     $customer->createPaymentSource(self::$validVisaCard);
     $subscription = $customer->createSubscription(array('plan' => 'gold-plan'));
     $this->assertTrue(strpos(get_class($subscription), 'Subscription') !== false);
@@ -80,7 +71,7 @@ class SubscriptionTest extends TestCase
   public function testSuccesfulSubscriptionResume()
   {
     $this->setApiKey();
-    $customer = \Conekta\Customer::create(self::$validCustomer);
+    $customer = Customer::create(self::$validCustomer);
     $customer->createPaymentSource(self::$validVisaCard);
     $subscription = $customer->createSubscription(array('plan' => 'gold-plan'));
     $this->assertTrue(strpos(get_class($subscription), 'Subscription') !== false);
@@ -92,7 +83,7 @@ class SubscriptionTest extends TestCase
   public function testSuccesfulSubscriptionCancel()
   {
     $this->setApiKey();
-    $customer = \Conekta\Customer::create(self::$validCustomer);
+    $customer = Customer::create(self::$validCustomer);
     $customer->createPaymentSource(self::$validVisaCard);
     $subscription = $customer->createSubscription(array('plan' => 'gold-plan'));
     $this->assertTrue(strpos(get_class($subscription), 'Subscription') !== false);

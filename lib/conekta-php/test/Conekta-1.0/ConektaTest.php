@@ -1,29 +1,21 @@
 <?php
-use PHPUnit\Framework\TestCase;
 
-require_once dirname(__FILE__).'/../../lib/Conekta.php';
+namespace Conekta;
 
-class ConektaTest extends TestCase
+class ConektaTest extends BaseTest
 {
   function setPlugin($plugin){
-    \Conekta\Conekta::setPlugin($plugin);
+    Conekta::setPlugin($plugin);
   }
-  function setApiKey()
-  {
-    $apiEnvKey = getenv('CONEKTA_API');
-    if (!$apiEnvKey) {
-      $apiEnvKey = '1tv5yJp3xnVZ7eK67m4h';
-    }
-    \Conekta\Conekta::setApiKey($apiEnvKey);
-  }
+
   function setEnvLocale($locale){
-    \Conekta\Conekta::setLocale($locale);
+    Conekta::setLocale($locale);
   }
 
   public function testApiLocaleInitializerStyle()
   {
     $this->setEnvLocale('en');
-    $this->assertTrue( \Conekta\Conekta::$locale == 'en');
+    $this->assertTrue( Conekta::$locale == 'en');
     $this->setEnvLocale('es');
   }
 
@@ -31,7 +23,7 @@ class ConektaTest extends TestCase
   {
     $this->setApiKey();
     $this->setPlugin('spree');
-    $this->assertTrue( \Conekta\Conekta::$plugin == 'spree');
+    $this->assertTrue( Conekta::$plugin == 'spree');
   }
 
 }

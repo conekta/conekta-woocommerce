@@ -1,19 +1,9 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
+namespace Conekta;
 
-require_once dirname(__FILE__).'/../../lib/Conekta.php';
-
-class DiscountLineTest extends TestCase
+class DiscountLineTest extends BaseTest
 {
-  function setApiKey()
-  {
-    $apiEnvKey = getenv('CONEKTA_API');
-    if (!$apiEnvKey) {
-      $apiEnvKey = '1tv5yJp3xnVZ7eK67m4h';
-    }
-    \Conekta\Conekta::setApiKey($apiEnvKey);
-  }
   public static $validOrder =
   array(
     'line_items'=> array(
@@ -45,7 +35,7 @@ class DiscountLineTest extends TestCase
   public function testSuccessfulDiscountLineDelete()
   {
     $this->setApiKey();
-    $order = \Conekta\Order::create(self::$validOrder);
+    $order = Order::create(self::$validOrder);
     $discountLine = $order->discount_lines[0];
     $discountLine->delete();
 
@@ -55,7 +45,7 @@ class DiscountLineTest extends TestCase
   public function testSuccessfulDiscountLineUpdate()
   {
     $this->setApiKey();
-    $order = \Conekta\Order::create(self::$validOrder);
+    $order = Order::create(self::$validOrder);
     $discountLine = $order->discount_lines[0];
     $discountLine->update(array('amount' => 11));
 
@@ -65,11 +55,11 @@ class DiscountLineTest extends TestCase
   public function testUnsuccessfulDiscountLineUpdate()
   {
     $this->setApiKey();
-    $order = \Conekta\Order::create(self::$validOrder);
+    $order = Order::create(self::$validOrder);
     $discountLine = $order->discount_lines[0];
     try{
       $discountLine->update(array('amount' => -1));
-    } catch(\Conekta\Handler $e) {
+    } catch(\Exception $e) {
       $this->assertTrue(strpos(get_class($e), 'ParameterValidationError') == true);
     }
   }

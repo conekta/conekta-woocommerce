@@ -2,9 +2,9 @@
 
 namespace Conekta;
 
-use \Conekta\Resource;
+use \Conekta\ConektaResource;
 
-class Customer extends Resource
+class Customer extends ConektaResource
 {
   var $livemode                 = "";
   var $name                     = "";
@@ -110,6 +110,22 @@ class Customer extends Resource
   public function createPaymentSource($params = null)
   {
     return parent::_createMemberWithRelation('payment_sources', $params, $this);
+  }
+
+  public function deletePaymentSourceById($paymentSourceId)
+  {
+    if (Conekta::$apiVersion == '2.0.0'){
+      $currentCustomer = $this;
+      $paymentSources = $currentCustomer->payment_sources;
+      $index = 0;
+      foreach ($paymentSources as $paymentSource) {
+        if ($paymentSource->id == $paymentSourceId){
+          $currentCustomer->payment_sources[$index]->delete();
+        }else{
+          $index += 1;
+        }
+      }
+    }
   }
 
   public function createCard($params = null)

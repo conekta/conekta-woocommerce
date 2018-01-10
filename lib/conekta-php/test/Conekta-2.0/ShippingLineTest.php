@@ -1,19 +1,9 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
+namespace Conekta;
 
-require_once dirname(__FILE__).'/../../lib/Conekta.php';
-
-class ShippingLineTest extends TestCase
+class ShippingLineTest extends BaseTest
 {
-  function setApiKey()
-  {
-    $apiEnvKey = getenv('CONEKTA_API');
-    if (!$apiEnvKey) {
-      $apiEnvKey = '1tv5yJp3xnVZ7eK67m4h';
-    }
-    \Conekta\Conekta::setApiKey($apiEnvKey);
-  }
   public static $validOrder =
   array(
     'line_items'=> array(
@@ -49,7 +39,7 @@ class ShippingLineTest extends TestCase
   public function testSuccessfulShippingLineDelete()
   {
     $this->setApiKey();
-    $order = \Conekta\Order::create(self::$validOrder);
+    $order = Order::create(self::$validOrder);
     $shippingLine = $order->shipping_lines[0];
     $shippingLine->delete();
     $this->assertTrue($shippingLine->deleted == true);
@@ -58,7 +48,7 @@ class ShippingLineTest extends TestCase
   public function testSuccessfulShippingLineUpdate()
   {
     $this->setApiKey();
-    $order = \Conekta\Order::create(self::$validOrder);
+    $order = Order::create(self::$validOrder);
     $shippingLine = $order->shipping_lines[0];
     $shippingLine->update(array('method' => 'Air'));
     $this->assertTrue($shippingLine->method == 'Air');
@@ -67,11 +57,11 @@ class ShippingLineTest extends TestCase
   public function testUnsuccessfulShippingLineUpdate()
   {
     $this->setApiKey();
-    $order = \Conekta\Order::create(self::$validOrder);
+    $order = Order::create(self::$validOrder);
     $shippingLine = $order->shipping_lines[0];
     try{
       $shippingLine->update(array('amount' => -1));
-    } catch (Exception $e) {
+    } catch (\Exception $e) {
       $this->assertTrue(strpos(get_class($e), 'ParameterValidationError') == true);
     }
   }

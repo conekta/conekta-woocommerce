@@ -1,20 +1,9 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
+namespace Conekta;
 
-require_once dirname(__FILE__).'/../../lib/Conekta.php';
-
-
-class LineItemTest extends TestCase
-{
-  function setApiKey()
-  {
-    $apiEnvKey = getenv('CONEKTA_API');
-    if (!$apiEnvKey) {
-      $apiEnvKey = '1tv5yJp3xnVZ7eK67m4h';
-    }
-    \Conekta\Conekta::setApiKey($apiEnvKey);
-  }     
+class LineItemTest extends BaseTest
+{   
   public static $validOrder =
   array(
     'line_items'=> array(
@@ -39,7 +28,7 @@ class LineItemTest extends TestCase
   public function testSuccessfulLineItemDelete()
   {
     $this->setApiKey();
-    $order = \Conekta\Order::create(self::$validOrder);
+    $order = Order::create(self::$validOrder);
     $lineItem = $order->line_items[0];
     $lineItem->delete();
 
@@ -49,7 +38,7 @@ class LineItemTest extends TestCase
   public function testSuccessfulLineItemUpdate()
   {
     $this->setApiKey();
-    $order = \Conekta\Order::create(self::$validOrder);
+    $order = Order::create(self::$validOrder);
     $lineItem = $order->line_items[0];
     $lineItem->update(array('unit_price' => 1000));
 
@@ -59,12 +48,12 @@ class LineItemTest extends TestCase
   public function testUnsuccessfulLineItemUpdate()
   {
     $this->setApiKey();
-    $order = \Conekta\Order::create(self::$validOrder);
+    $order = Order::create(self::$validOrder);
     $lineItem = $order->line_items[0];
     try {
       $lineItem->update(array('unit_price' => -1));
 
-    } catch(\Conekta\Handler $e) {
+    } catch(\Exception $e) {
       $this->assertTrue(strpos(get_class($e), 'ParameterValidationError') == true);
     }
   }

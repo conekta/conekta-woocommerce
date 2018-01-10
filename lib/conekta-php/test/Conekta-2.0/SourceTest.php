@@ -1,19 +1,9 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
+namespace Conekta;
 
-require_once dirname(__FILE__).'/../../lib/Conekta.php';
-
-class SourceTest extends TestCase
+class SourceTest extends BaseTest
 {
-  function setApiKey()
-  {
-    $apiEnvKey = getenv('CONEKTA_API');
-    if (!$apiEnvKey) {
-      $apiEnvKey = '1tv5yJp3xnVZ7eK67m4h';
-    }
-    \Conekta\Conekta::setApiKey($apiEnvKey);
-  }
   public static $validCustomer =
   array('email' => 'hola@hola.com',
     'name' => 'John Constantine',
@@ -26,7 +16,7 @@ class SourceTest extends TestCase
   public function testSuccesfulDeleteSources()
   {
     $this->setApiKey();
-    $customer = \Conekta\Customer::create(self::$validCustomer);
+    $customer = Customer::create(self::$validCustomer);
     $paymentSource = $customer->payment_sources[0];
     $paymentSource->delete();
     $this->assertTrue($paymentSource->deleted == true);
@@ -35,7 +25,7 @@ class SourceTest extends TestCase
   public function testSuccesfulUpdateSources()
   {
     $this->setApiKey();
-    $customer = \Conekta\Customer::create(self::$validCustomer);
+    $customer = Customer::create(self::$validCustomer);
     $paymentSource = $customer->payment_sources[0];
     $paymentSource->update(array('exp_month' => '11'));
     $this->assertTrue($paymentSource->exp_month == '11');
@@ -43,11 +33,11 @@ class SourceTest extends TestCase
 
   public function testUnsuccesfulUpdateSources(){
     $this->setApiKey();
-    $customer = \Conekta\Customer::create(self::$validCustomer);
+    $customer = Customer::create(self::$validCustomer);
     $paymentSource = $customer->payment_sources[0];
     try{
       $paymentSource->update(array('token_id' => 'tok_test_visa_4241'));
-    }catch (Exception $e) {
+    }catch (\Exception $e) {
       $this->assertTrue(strpos(get_class($e), 'ParameterValidationError') == true);
     }
   }

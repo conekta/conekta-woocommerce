@@ -1,19 +1,10 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
+namespace Conekta;
 
-require_once dirname(__FILE__).'/../../lib/Conekta.php';
-
-class ChargeTest extends TestCase
+class ChargeTest extends BaseTest
 {
-  function setApiKey()
-  {
-    $apiEnvKey = getenv('CONEKTA_API');
-    if (!$apiEnvKey) {
-      $apiEnvKey = '1tv5yJp3xnVZ7eK67m4h';
-    }
-    \Conekta\Conekta::setApiKey($apiEnvKey);
-  }
+
   public static $validOrder = array(
     'line_items'=> array(
       array(
@@ -44,9 +35,9 @@ class ChargeTest extends TestCase
   public static $oxxo = array('payment_method' => array('type' => 'oxxo_cash',), 'amount' => 20000);
   public function testCreateOrder()
   {
-    $this->setApiKey(); // api key is set in every function call
+    $this->setApiKey();
     $orderParams = array_merge(self::$validOrder, self::$otherParams);
-    $order = \Conekta\Order::create($orderParams);
+    $order = Order::create($orderParams);
     $this->assertTrue(strpos(get_class($order), 'Order') !== false);
     
     return $order;
@@ -56,7 +47,7 @@ class ChargeTest extends TestCase
   {
     $order  = $this->testCreateOrder(); 
     $charge = $order->createCharge(self::$chargeParams);
-    $filterCharges = \Conekta\Order::find($charge->id);
+    $filterCharges = Order::find($charge->id);
     $validCharge = $filterCharges->charges[0];
     $this->assertTrue(strpos(get_class($validCharge), 'Charge') !== false);
   }

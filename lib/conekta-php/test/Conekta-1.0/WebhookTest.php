@@ -1,22 +1,9 @@
 <?php
-use PHPUnit\Framework\TestCase;
 
-require_once dirname(__FILE__).'/../../lib/Conekta.php';
+namespace Conekta;
 
-class WebhookTest extends TestCase
+class WebhookTest extends BaseTest
 {
-  function setApiKey()
-  {
-    $apiEnvKey = getenv('CONEKTA_API');
-    if (!$apiEnvKey) {
-      $apiEnvKey = '1tv5yJp3xnVZ7eK67m4h';
-    }
-    \Conekta\Conekta::setApiKey($apiEnvKey);
-  }
-  function setApiVersion($version)
-  {
-    \Conekta\Conekta::setApiVersion($version);
-  }
   public static $events = array("events" => 
     array("charge.created", "charge.paid", "charge.under_fraud_review",
       "charge.fraudulent", "charge.refunded", "charge.created", "customer.created",
@@ -37,7 +24,7 @@ class WebhookTest extends TestCase
   {
     $this->setApiKey();
     $this->setApiVersion('1.0.0');
-    $webhook = \Conekta\Webhook::create(array_merge(self::$url, self::$events));
+    $webhook = Webhook::create(array_merge(self::$url, self::$events));
     $this->assertTrue(strpos(get_class($webhook), 'Webhook') !== false);
     $this->assertTrue(strpos($webhook->webhook_url, self::$url["url"]) !== false);
     $webhook->update(array("url" => "http://www.example.com/my_listener"));

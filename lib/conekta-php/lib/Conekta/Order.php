@@ -2,9 +2,9 @@
 
 namespace Conekta;
 
-use \Conekta\Resource;
+use \Conekta\ConektaResource;
 
-class Order extends Resource
+class Order extends ConektaResource
 {
   var $livemode      = "";
   var $amount        = "";
@@ -83,6 +83,11 @@ class Order extends Resource
   public function capture()
   {
     return parent::_customAction('put', 'capture', null);
+  }
+
+  public function void($params = null)
+  {
+    return parent::_customAction('post', 'void', $params);
   }
 
   public function createTaxLine($params = null)

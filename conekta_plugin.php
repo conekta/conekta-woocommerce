@@ -13,7 +13,7 @@ if (!class_exists('Conekta'))
 
 class WC_Conekta_Plugin extends WC_Payment_Gateway
 {
-	public $version  = "3.0.2";
+	public $version  = "3.0.3";
 	public $name = "WooCommerce 2";
 	public $description = "Payment Gateway through Conekta.io for Woocommerce for both credit and debit cards as well as cash payments in OXXO and monthly installments for Mexican credit cards.";
 	public $plugin_name = "Conekta Payment Gateway for Woocommerce";

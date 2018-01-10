@@ -1,27 +1,14 @@
 <?php
-use PHPUnit\Framework\TestCase;
 
-require_once dirname(__FILE__).'/../../lib/Conekta.php';
+namespace Conekta;
 
-class PayoutTest extends TestCase
+class PayoutTest extends BaseTest
 {
-  function setApiKey()
-  {
-    $apiEnvKey = getenv('CONEKTA_API');
-    if (!$apiEnvKey) {
-      $apiEnvKey = '1tv5yJp3xnVZ7eK67m4h';
-    }
-    \Conekta\Conekta::setApiKey($apiEnvKey);
-  }
-  function setApiVersion($version)
-  {
-    \Conekta\Conekta::setApiVersion($version);
-  }
   public function testSuccesfulGetPayout()
   {
     $this->setApiKey();
     $this->setApiVersion('1.0.0');
-    $payee = \Conekta\Payee::create(array(
+    $payee = Payee::create(array(
       'name'  => 'John Doe',
       'email' => 'j_d@radcorp->com',
       'phone' => '555555555',
@@ -58,7 +45,7 @@ class PayoutTest extends TestCase
     $this->assertTrue(strpos('tax121212abc', $payee->billing_address->tax_id) !== false);
     $this->assertTrue(strpos('06100', $payee->billing_address->zip) !== false);
 
-    $payout = \Conekta\Payout::create(array(
+    $payout = Payout::create(array(
       'amount'   => 5000,
       'currency' => 'MXN',
       'payee'    => $payee->id,
