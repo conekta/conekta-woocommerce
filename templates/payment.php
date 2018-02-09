@@ -7,9 +7,9 @@
 ?>
 <div class="clear"></div>
 <span style="width: 100%; float: left; color: red;" class='payment-errors required'></span>
-<div class="form-row form-row-wide">
+
+<div class="form-row form-row-wide" id="conekta-card-number" style="height: 80px;">
   <label for="conekta-card-number"><?php echo esc_html($this->lang_options["card_number"]); ?><span class="required">*</span></label>
-  <input id="conekta-card-number" class="input-text" type="text" data-conekta="card[number]" />
 </div>
 
 <div class="form-row form-row-wide">
@@ -48,10 +48,9 @@
 
 <div class="clear"></div>
 
-<p class="form-row form-row-first">
-    <label for="conekta-card-cvc">CVC <span class="required">*</span></label>
-    <input id="conekta-card-cvc" class="input-text" type="text" maxlength="4" data-conekta="card[cvc]" value=""  style="border-radius:6px"/>
-</p>
+<div class="form-row form-row-first" id="conekta-card-cvc" style="height: 80px;">
+  <label for="conekta-card-cvc">CVC <span class="required">*</span></label>
+</div>
 
 <?php if ($this->enable_meses): ?>
 <p class="form-row form-row-last">

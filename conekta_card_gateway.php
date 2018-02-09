@@ -156,8 +156,8 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
             return;
         }
 
-        wp_enqueue_script('conekta_js', 'https://conektaapi.s3.amazonaws.com/v0.3.2/js/conekta.js', '', '', true);
-        wp_enqueue_script('tokenize', WP_PLUGIN_URL."/".plugin_basename(dirname(__FILE__)).'/assets/js/tokenize.js', '', '1.0', true); //check import convention
+        wp_enqueue_script('conekta_sdk', 'https://cdn.conekta.io/iframe/latest/index.min.js', '', '', true);
+        wp_enqueue_script('tokenize', WP_PLUGIN_URL."/".plugin_basename(dirname(__FILE__)).'/assets/js/tokenize.js', '', '2.0', true); //check import convention
 
         //PCI
         $params = array(
