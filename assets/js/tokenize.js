@@ -32,7 +32,10 @@ jQuery(document).ready(function ($) {
 					return showError('La fecha de la tarjeta es inválida');
 				}
 			} else {
-				$form.append($('<input type="hidden" name="conekta_token" />').val(token.id));
+				if($('<input type="hidden" name="conekta_token" />').length > 0)
+					$('<input type="hidden" name="conekta_token" />').val(token.id);
+				else
+					$form.append($('<input type="hidden" name="conekta_token" />').val(token.id));
 				$form.submit();
 			}
 		}
@@ -82,17 +85,5 @@ jQuery(document).ready(function ($) {
 		}
 
 		renderComponents(wc_conekta_params.public_key, cardComponent, cvcComponent);
-		// Conekta.init(wc_conekta_params.public_key, {
-		// 	card: {
-		// 		id: 'conekta-card-number',
-		// 		style: inputStyle,
-		// 		placeholder: ' '
-		// 	},
-		// 	cvc: {
-		// 		id: 'conekta-card-cvc',
-		// 		style: inputStyle,
-		// 		placeholder: ' '
-		// 	},
-		// });
 	});
 });
