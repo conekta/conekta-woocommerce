@@ -22,26 +22,27 @@ jQuery(document).ready(function ($) {
 			}
 		});
 
-		Conekta.tokenize({
-			name: $('#conekta-card-name').val(),
-			expMonth: $('#card_expiration').val(),
-			expYear: $('#card_expiration_yr').val()
-		}, function (err, token) {
-			if (err) {
-				if (err.message_to_purchaser) {
-					return showError(err.message_to_purchaser);
-				} else if (!err.card) {
+		function callBack(token) {
+			if (!token.id) {
+				if (!token.card) {
 					return showError('El número de tarjeta es inválido');
-				} else if (!err.cvc) {
+				} else if (!token.cvc) {
 					return showError('El cvc es inválido');
-				} else if (!err.date) {
+				} else if (!token.date) {
 					return showError('La fecha de la tarjeta es inválida');
 				}
 			} else {
 				$form.append($('<input type="hidden" name="conekta_token" />').val(token.id));
 				$form.submit();
 			}
+		}
+
+		createToken('conekta-card-number', callBack, {
+			name: $('#conekta-card-name').val(),
+			expMonth: $('#card_expiration').val(),
+			expYear: $('#card_expiration_yr').val()
 		});
+
 		return false;
 	});
 
@@ -64,17 +65,34 @@ jQuery(document).ready(function ($) {
 			'vertical-align': 'baseline',
 			'border': '0',
 		};
-		Conekta.init(wc_conekta_params.public_key, {
-			card: {
-				id: 'conekta-card-number',
-				style: inputStyle,
-				placeholder: ' '
-			},
-			cvc: {
-				id: 'conekta-card-cvc',
-				style: inputStyle,
-				placeholder: ' '
-			},
-		});
+		var cardComponent = {
+			style: inputStyle, 
+			idElement: 'conekta-card-number',
+			advanceStyle:[
+				{name: 'valid', style: {'box-shadow': 'inset 2px 0 0 #0f834d'}}
+			],
+			animation: true
+		};
+		var cvcComponent = {
+			style: inputStyle,
+			advanceStyle:[
+				{name: 'valid', style: {'box-shadow': 'inset 2px 0 0 #0f834d'}}
+			],
+			idElement: 'conekta-card-cvc'
+		}
+
+		renderComponents(wc_conekta_params.public_key, cardComponent, cvcComponent);
+		// Conekta.init(wc_conekta_params.public_key, {
+		// 	card: {
+		// 		id: 'conekta-card-number',
+		// 		style: inputStyle,
+		// 		placeholder: ' '
+		// 	},
+		// 	cvc: {
+		// 		id: 'conekta-card-cvc',
+		// 		style: inputStyle,
+		// 		placeholder: ' '
+		// 	},
+		// });
 	});
 });
