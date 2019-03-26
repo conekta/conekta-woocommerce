@@ -19,7 +19,8 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
     protected $transaction_error_message = null;
     protected $currencies                = array('MXN', 'USD');
 
-    public function __construct() {
+    public function __construct()
+    {
         $this->id = 'conektacard';
         $this->method_title = __('Conekta Card', 'conektacard');
         $this->has_fields = true;
@@ -30,9 +31,8 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
         $this->title       = $this->settings['title'];
         $this->description = '';
         $this->icon        = $this->settings['alternate_imageurl'] ?
-                             $this->settings['alternate_imageurl'] :
-                             WP_PLUGIN_URL . "/" . plugin_basename( dirname(__FILE__))
-                             . '/images/credits.png';
+            $this->settings['alternate_imageurl'] : WP_PLUGIN_URL . "/" . plugin_basename(dirname(__FILE__))
+            . '/images/credits.png';
 
         $this->use_sandbox_api      = strcmp($this->settings['debug'], 'yes') == 0;
         $this->enable_meses         = strcmp($this->settings['meses'], 'yes') == 0;
@@ -41,18 +41,15 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
         $this->test_publishable_key = $this->settings['test_publishable_key'];
         $this->live_publishable_key = $this->settings['live_publishable_key'];
         $this->publishable_key      = $this->use_sandbox_api ?
-                                      $this->test_publishable_key :
-                                      $this->live_publishable_key;
+            $this->test_publishable_key : $this->live_publishable_key;
         $this->secret_key           = $this->use_sandbox_api ?
-                                      $this->test_api_key :
-                                      $this->live_api_key;
-        $this->lang_options         = parent::ckpg_set_locale_options()->
-                                    ckpg_get_lang_options();
+            $this->test_api_key : $this->live_api_key;
+        $this->lang_options         = parent::ckpg_set_locale_options()->ckpg_get_lang_options();
 
         add_action('wp_enqueue_scripts', array($this, 'ckpg_payment_fields'));
         add_action(
-          'woocommerce_update_options_payment_gateways_'.$this->id,
-          array($this, 'process_admin_options')
+            'woocommerce_update_options_payment_gateways_' . $this->id,
+            array($this, 'process_admin_options')
         );
         add_action('admin_notices', array(&$this, 'ckpg_perform_ssl_check'));
 
@@ -60,8 +57,8 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
             $this->enabled = false;
         }
 
-        if(empty($this->secret_key)) {
-          $this->enabled = false;
+        if (empty($this->secret_key)) {
+            $this->enabled = false;
         }
     }
 
@@ -71,93 +68,99 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
     */
     public function ckpg_perform_ssl_check()
     {
-        if (!$this->use_sandbox_api
-          && get_option('woocommerce_force_ssl_checkout') == 'no'
-          && $this->enabled == 'yes') {
+        if (
+            !$this->use_sandbox_api
+            && get_option('woocommerce_force_ssl_checkout') == 'no'
+            && $this->enabled == 'yes'
+        ) {
             echo '<div class="error"><p>'
-              .sprintf(
-                __('%s sandbox testing is disabled and can performe live transactions'
-                .' but the <a href="%s">force SSL option</a> is disabled; your checkout'
-                .' is not secure! Please enable SSL and ensure your server has a valid SSL'
-                .' certificate.', 'woothemes'),
-                $this->GATEWAY_NAME, admin_url('admin.php?page=settings')
-              )
-            .'</p></div>';
+                . sprintf(
+                    __('%s sandbox testing is disabled and can performe live transactions'
+                        . ' but the <a href="%s">force SSL option</a> is disabled; your checkout'
+                        . ' is not secure! Please enable SSL and ensure your server has a valid SSL'
+                        . ' certificate.', 'woothemes'),
+                    $this->GATEWAY_NAME,
+                    admin_url('admin.php?page=settings')
+                )
+                . '</p></div>';
         }
     }
 
     public function ckpg_init_form_fields()
     {
         $this->form_fields = array(
-         'enabled' => array(
-          'type'        => 'checkbox',
-          'title'       => __('Enable/Disable', 'woothemes'),
-          'label'       => __('Enable Credit Card Payment', 'woothemes'),
-          'default'     => 'yes'
-          ),
-         'meses' => array(
-            'type'        => 'checkbox',
-            'title'       => __('Meses sin Intereses', 'woothemes'),
-            'label'       => __('Enable Meses sin Intereses', 'woothemes'),
-            'default'     => 'no'
+            'enabled' => array(
+                'type'        => 'checkbox',
+                'title'       => __('Enable/Disable', 'woothemes'),
+                'label'       => __('Enable Credit Card Payment', 'woothemes'),
+                'default'     => 'yes'
             ),
-         'debug' => array(
-            'type'        => 'checkbox',
-            'title'       => __('Testing', 'woothemes'),
-            'label'       => __('Turn on testing', 'woothemes'),
-            'default'     => 'no'
+            'meses' => array(
+                'type'        => 'checkbox',
+                'title'       => __('Meses sin Intereses', 'woothemes'),
+                'label'       => __('Enable Meses sin Intereses', 'woothemes'),
+                'default'     => 'no'
             ),
-         'title' => array(
-            'type'        => 'text',
-            'title'       => __('Title', 'woothemes'),
-            'description' => __('This controls the title which the user sees during checkout.', 'woothemes'),
-            'default'     => __('Credit Card Payment', 'woothemes')
+            'debug' => array(
+                'type'        => 'checkbox',
+                'title'       => __('Testing', 'woothemes'),
+                'label'       => __('Turn on testing', 'woothemes'),
+                'default'     => 'no'
             ),
-         'test_api_key' => array(
-             'type'        => 'password',
-             'title'       => __('Conekta API Test Private key', 'woothemes'),
-             'default'     => __('', 'woothemes')
-             ),
-         'test_publishable_key' => array(
-             'type'        => 'text',
-             'title'       => __('Conekta API Test Public key', 'woothemes'),
-             'default'     => __('', 'woothemes')
-             ),
-         'live_api_key' => array(
-             'type'        => 'password',
-             'title'       => __('Conekta API Live Private key', 'woothemes'),
-             'default'     => __('', 'woothemes')
-             ),
-         'live_publishable_key' => array(
-             'type'        => 'text',
-             'title'       => __('Conekta API Live Public key', 'woothemes'),
-             'default'     => __('', 'woothemes')
-             ),
-         'alternate_imageurl' => array(
-           'type'        => 'text',
-           'title'       => __('Alternate Image to display on checkout, use fullly qualified url, served via https', 'woothemes'),
-           'default'     => __('', 'woothemes')
-           ),
+            'title' => array(
+                'type'        => 'text',
+                'title'       => __('Title', 'woothemes'),
+                'description' => __('This controls the title which the user sees during checkout.', 'woothemes'),
+                'default'     => __('Credit Card Payment', 'woothemes')
+            ),
+            'test_api_key' => array(
+                'type'        => 'password',
+                'title'       => __('Conekta API Test Private key', 'woothemes'),
+                'default'     => __('', 'woothemes')
+            ),
+            'test_publishable_key' => array(
+                'type'        => 'text',
+                'title'       => __('Conekta API Test Public key', 'woothemes'),
+                'default'     => __('', 'woothemes')
+            ),
+            'live_api_key' => array(
+                'type'        => 'password',
+                'title'       => __('Conekta API Live Private key', 'woothemes'),
+                'default'     => __('', 'woothemes')
+            ),
+            'live_publishable_key' => array(
+                'type'        => 'text',
+                'title'       => __('Conekta API Live Public key', 'woothemes'),
+                'default'     => __('', 'woothemes')
+            ),
+            'alternate_imageurl' => array(
+                'type'        => 'text',
+                'title'       => __('Alternate Image to display on checkout, use fullly qualified url, served via https', 'woothemes'),
+                'default'     => __('', 'woothemes')
+            ),
 
 
-         );
+        );
     }
 
-    public function admin_options() {
+    public function admin_options()
+    {
         include_once('templates/admin.php');
     }
 
-    public function payment_fields() {
+    public function payment_fields()
+    {
         include_once('templates/payment.php');
     }
 
-    public function ckpg_payment_fields() {
+    public function ckpg_payment_fields()
+    {
         if (!is_checkout()) {
             return;
         }
 
-        wp_enqueue_script('conekta_js', 'https://conektaapi.s3.amazonaws.com/v0.3.2/js/conekta.js', '', '', true);
-        wp_enqueue_script('tokenize', WP_PLUGIN_URL."/".plugin_basename(dirname(__FILE__)).'/assets/js/tokenize.js', '', '1.0', true); //check import convention
+        wp_enqueue_script('conekta_js', 'https://s3.us-east-2.amazonaws.com/conektadirect/latest/index.js', '', '', true);
+        wp_enqueue_script('tokenize', WP_PLUGIN_URL . "/" . plugin_basename(dirname(__FILE__)) . '/assets/js/tokenize.js', '', '1.0', true); //check import convention
 
         //PCI
         $params = array(
@@ -239,16 +242,15 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
 
             $this->transaction_id = $charge->id;
             if ($data['monthly_installments'] > 1) {
-                update_post_meta( $this->order->get_id(), 'meses-sin-intereses', $data['monthly_installments']);
+                update_post_meta($this->order->get_id(), 'meses-sin-intereses', $data['monthly_installments']);
             }
-            update_post_meta( $this->order->get_id(), 'transaction_id', $this->transaction_id);
+            update_post_meta($this->order->get_id(), 'transaction_id', $this->transaction_id);
             return true;
-
-        } catch(\Conekta\Handler $e) {
+        } catch (\Conekta\Handler $e) {
             $description = $e->getMessage();
             global $wp_version;
             if (version_compare($wp_version, '4.1', '>=')) {
-                wc_add_notice(__('Error: ', 'woothemes') . $description , $notice_type = 'error');
+                wc_add_notice(__('Error: ', 'woothemes') . $description, $notice_type = 'error');
             } else {
                 error_log('Gateway Error:' . $description . "\n");
                 $woocommerce->add_error(__('Error: ', 'woothemes') . $description);
@@ -260,12 +262,12 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
     protected function ckpg_mark_as_failed_payment()
     {
         $this->order->add_order_note(
-         sprintf(
-             "%s Credit Card Payment Failed : '%s'",
-             $this->GATEWAY_NAME,
-             $this->transaction_error_message
-             )
-         );
+            sprintf(
+                "%s Credit Card Payment Failed : '%s'",
+                $this->GATEWAY_NAME,
+                $this->transaction_error_message
+            )
+        );
     }
 
     protected function ckpg_completeOrder()
@@ -275,17 +277,17 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
         if ($this->order->get_status() == 'completed')
             return;
 
-            // adjust stock levels and change order status
+        // adjust stock levels and change order status
         $this->order->payment_complete();
         $woocommerce->cart->empty_cart();
 
         $this->order->add_order_note(
-           sprintf(
-               "%s payment completed with Transaction Id of '%s'",
-               $this->GATEWAY_NAME,
-               $this->transaction_id
-               )
-           );
+            sprintf(
+                "%s payment completed with Transaction Id of '%s'",
+                $this->GATEWAY_NAME,
+                $this->transaction_id
+            )
+        );
 
         unset($_SESSION['order_awaiting_payment']);
     }
@@ -294,18 +296,15 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
     {
         global $woocommerce;
         $this->order        = new WC_Order($order_id);
-        if ($this->ckpg_send_to_conekta())
-        {
+        if ($this->ckpg_send_to_conekta()) {
             $this->ckpg_completeOrder();
 
             $result = array(
                 'result' => 'success',
                 'redirect' => $this->get_return_url($this->order)
-                );
+            );
             return $result;
-        }
-        else
-        {
+        } else {
             $this->ckpg_mark_as_failed_payment();
             WC()->session->reload_checkout = true;
         }
@@ -317,16 +316,19 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
      * @access public
      * @return bool
      */
-    public function ckpg_validate_currency() {
+    public function ckpg_validate_currency()
+    {
         return in_array(get_woocommerce_currency(), $this->currencies);
     }
 
-    public function ckpg_is_null_or_empty_string($string) {
+    public function ckpg_is_null_or_empty_string($string)
+    {
         return (!isset($string) || trim($string) === '');
     }
 }
 
-function ckpg_conekta_card_add_gateway($methods) {
+function ckpg_conekta_card_add_gateway($methods)
+{
     array_push($methods, 'WC_Conekta_Card_Gateway');
     return $methods;
 }
