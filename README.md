@@ -1,15 +1,11 @@
 <div align="center">
 
-=======
+![banner](readme_files/banner.png)
 
 # Conekta Woocommerce v.3.0.4
 
-[![Made with PHP](https://img.shields.io/badge/made%20with-php-red.svg?style=for-the-badge&colorA=ED4040&colorB=C12C2D)](http://php.net)
-[![By Conekta](https://img.shields.io/badge/by-conekta-red.svg?style=for-the-badge&colorA=ee6130&colorB=00a4ac)](https://conekta.com)
-
-</div>
-
-[![Made with PHP](https://img.shields.io/badge/made%20with-php-red.svg?style=for-the-badge&colorA=ED4040&colorB=C12C2D)](http://php.net) [![By Conekta](https://img.shields.io/badge/by-conekta-red.svg?style=for-the-badge&colorA=ee6130&colorB=00a4ac)](https://conekta.com)
+![php badge](readme_files/php-badge.png)
+![conekta badge](readme_files/conekta-badge.png)
 
 </div>
 
@@ -26,14 +22,14 @@ Current version features:
 - Cash payments implemented
 - Custom description and instructions in offline payments (OXXO and SPEI)
 
-![alt tag](https://raw.github.com/conekta/conekta-woocommerce/master/readme_files/admin_card.png)
+![admin card](readme_files/admin_card.png)
 
 - Sandbox testing capability.
 - Automatic order status management
 - Email notifications on successful purchase
 - Email notifications on successful in cash payment
 
-![alt tag](https://raw.github.com/conekta/conekta-woocommerce/master/readme_files/email.png)
+![email](readme_files/email.png)
 
 Example for custom instructions:
 
@@ -66,12 +62,12 @@ Method 2:
 
 - Add your API keys in Woocommerce > Settings > Checkout from your Conekta account (admin.conekta.io) in https://admin.conekta.io#developers.keys
 
-![alt tag](https://raw.github.com/conekta/conekta-woocommerce/master/readme_files/form.png)
+![form](readme_files/form.png)
 
 - To manage orders for offline payments so that the status changes dynamically, you will need to add the following url as a webhook in your Conekta account:
-  http://tusitio.com/wc-api/WC_Conekta_Cash_Gateway
+https://tusitio.com/wc-api/WC_Conekta_Cash_Gateway
 
-![alt tag](https://raw.github.com/conekta/conekta-woocommerce/master/readme_files/webhook.png)
+![webhook](readme_files/webhook.png)
 
 Replace to **tusitio.com** with your domain name
 
@@ -125,50 +121,4 @@ Developed in Mexico by [Conekta](https://www.conekta.com) in. Available with [MI
 
 ## We are always hiring!
 
-If you are a comfortable working with a range of backend languages (Java, Python, Ruby, PHP, etc) and frameworks, you have solid foundation in data structures, algorithms and software design with strong analytical and debugging skills, check our open positions: https://www.conekta.com/careers
-
-## How to contribute to the project
-
-1. Fork the repository
-
-2. Clone the repository
-
-```
-    git clone git@github.com:yourUserName/conekta-woocommerce.git
-```
-
-3. Create a branch
-
-```
-    git checkout develop
-    git pull origin develop
-    # You should choose the name of your branch
-    git checkout -b <feature/my_branch>
-```
-
-4. Make necessary changes and commit those changes
-
-```
-    git add .
-    git commit -m "my changes"
-```
-
-5. Push changes to GitHub
-
-```
-    git push origin <feature/my_branch>
-```
-
-6. Submit your changes for review, create a pull request
-
-   To create a pull request, you need to have made your code changes on a separate branch. This branch should be named like this: **feature/my_feature** or **fix/my_fix**.
-
-   Make sure that, if you add new features to our library, be sure that corresponding **unit tests** are added.
-
-   If you go to your repository on GitHub, you’ll see a Compare & pull request button. Click on that button.
-
----
-
-## We are always hiring!
-
-If you are a comfortable working with a range of backend languages (Java, Python, Ruby, PHP, etc) and frameworks, you have solid foundation in data structures, algorithms and software design with strong analytical and debugging skills, check our open positions: https://www.conekta.com/careers
+If you are a comfortable working with a range of backend languages (Java, Python, Ruby, PHP, Go, C#, etc) and frameworks, you have solid foundation in data structures, algorithms and software design with strong analytical and debugging skills, check our open positions: https://www.conekta.com/careers
