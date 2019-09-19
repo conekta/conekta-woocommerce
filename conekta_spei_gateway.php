@@ -91,6 +91,7 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
 
     public function ckpg_init_form_fields()
     {
+        //Posiblemente hay que cambiar __('','') por define('','') para la versión mas reciente de PHP
         $this->form_fields = array(
             'enabled' => array(
                 'type'        => 'checkbox',

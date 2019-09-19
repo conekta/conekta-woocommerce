@@ -71,6 +71,7 @@ class WC_Conekta_Card_Gateway extends WC_Conekta_Plugin
     */
     public function ckpg_perform_ssl_check()
     {
+        ///
         if (!$this->use_sandbox_api
           && get_option('woocommerce_force_ssl_checkout') == 'no'
           && $this->enabled == 'yes') {
