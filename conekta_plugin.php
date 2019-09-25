@@ -73,6 +73,28 @@ class WC_Conekta_Plugin extends WC_Payment_Gateway
         sprintf(__('Pago realizado satisfactoriamente')), $body_message);
      	  $mail_admin->send(get_option("admin_email"), $title, $message);
      	  unset($mail_admin);
+	}
+	
+
+	// Order email notification
+	public function ckpg_order_notification($order_id, $customer)
+	{
+   		global $woocommerce;
+   		$order = new WC_Order($order_id);
+
+   		$title = sprintf("Pedido #%s - Pendiente de pago", $order->get_order_number());
+   		$body_message = "<p style=\"margin:0 0 16px\">Pedido #".$order->get_order_number()." - Pendiente de pago:</p><br />" . $this->ckpg_assemble_email_payment($order);
+
+      	// Email for customer
+      	$customer = esc_html($customer);
+      	$customer = sanitize_text_field($customer);
+
+      	$mail_customer = $woocommerce->mailer();
+      	$message = $mail_customer->wrap_message(
+        sprintf(__('Hola, %s'), $customer), $body_message);
+     	  $mail_customer->send($order->get_billing_email(), $title, $message);
+     	  unset($mail_customer);
+     	  
     }
 
     public function ckpg_assemble_email_payment($order){

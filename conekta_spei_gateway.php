@@ -85,7 +85,7 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
                 $order->payment_complete();
                 $order->add_order_note(sprintf("Payment completed in Spei and notification of payment received"));
 
-                parent::ckpg_offline_payment_notification($order_id, $conekta_order['customer_info']['name']);
+                // Se elimina el envio personalizado de email a favor del envio nativo de woocommerce cuando se completa un pedido
             }
     }
 
@@ -186,7 +186,7 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
      */
     public function ckpg_email_instructions( $order, $sent_to_admin = false, $plain_text = false ) {
         $instructions = $this->form_fields['instructions'];
-        if ( $instructions && 'on-hold' === $order->get_status() ) {
+        if ( $instructions && 'pending' === $order->get_status() ) {
             echo wpautop( wptexturize( $this->settings['instructions'] ) ) . PHP_EOL;
         }
     }
@@ -285,8 +285,11 @@ class WC_Conekta_Spei_Gateway extends WC_Conekta_Plugin
         $this->order        = new WC_Order($order_id);
         if ($this->ckpg_send_to_conekta())
             {
-                // Mark as on-hold (we're awaiting the notification of payment)
-                $this->order->update_status('on-hold', __( 'Awaiting the conekta SPEI payment', 'woocommerce' ));
+                // Mark as pending(we're awaiting the notification of payment)
+                $this->order->update_status('pending', __( 'Awaiting the conekta SPEI payment', 'woocommerce' ));
+
+                // Send order email to customer
+                parent::ckpg_order_notification($order_id, $this->order->billing_first_name.' '.$this->order->billing_last_name);
 
                 // Remove cart
                 $woocommerce->cart->empty_cart();
