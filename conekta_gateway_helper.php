@@ -211,7 +211,7 @@ function ckpg_get_request_data($order)
         if (!empty($shipping_method)) {
             $shipping_lines  = array(
                 array(
-                    'amount'  => (int) intval($amountShipping),
+                    'amount'  => (int) $amountShipping,
                     'carrier' => $shipping_method,
                     'method'  => $shipping_method
                 )
