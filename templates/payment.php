@@ -28,8 +28,17 @@
 	<div id="conektaIframeContainer" style="width: 100%;"></div>
 <?php endif ?>
 <script>
-	let order_btn_card = document.getElementById("place_order");
-	if(order_btn_card && order_btn_card.style.display != "none")
-		order_btn_card.style.display = "none";
+	var order_btn_card = document.getElementById("place_order");
+    var radiogroup = document.checkout.payment_method
+    if(radiogroup.length > 1){
+        radiogroup.forEach((method) => {
+            method.addEventListener("change", function(){
+                if(order_btn_card)
+                    order_btn_card.style.display = (radiogroup.value == "conektacard") ? "none" : "block";
+            });
+        });
+    }
+    if(order_btn_card)
+            order_btn_card.style.display = (radiogroup.value == "conektacard") ? "none" : "block";
 </script>
 <div class="clear"></div> 

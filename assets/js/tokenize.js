@@ -262,8 +262,19 @@ const validate_checkout = function () {
                             buttonType: "sharp", // 'basic' | 'rounded' | 'sharp'
                         },
                         },
-                        onFinalizePayment: function (event) {
-                            document.getElementById("place_order").click();
+                        onFinalizePayment: function (order) {
+                          let method = (order && order.charge && order.charge.payment_method) ? order.charge.payment_method.type : null;
+                          let charge_id = (order && order.charge) ? order.charge.id : null;
+                          let form = jQuery('form[name=checkout]');
+                          form.append(jQuery('<input type="hidden" name="conekta_payment_method" id="conekta_payment_method" />').val(method));
+                          form.append(jQuery('<input type="hidden" name="charge_id" id="charge_id" />').val(charge_id));
+                          switch(method){
+                            case "oxxo": 
+                              form.append(jQuery('<input type="hidden" name="reference" id="reference" />').val(order.reference)); break;
+                            case "spei": 
+                              form.append(jQuery('<input type="hidden" name="clabe" id="clabe" />').val(order.reference)); break;
+                          }
+                          document.getElementById("place_order").click();
                         },
                     });
                 }
@@ -280,7 +291,9 @@ const validate_checkout = function () {
     }
 };
 let billing_form_card = document.getElementById("customer_details");
-Array.from(billing_form_card.querySelectorAll("input,select")).forEach((e) => {
-  e.addEventListener("change", validate_checkout);
-});
-window.onload = () => {validate_checkout()}
+if(billing_form_card){
+  Array.from(billing_form_card.querySelectorAll("input,select")).forEach((e) => {
+    e.addEventListener("change", validate_checkout);
+  });
+}
+window.onload = () => {if(billing_form_card){validate_checkout()}}

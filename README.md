@@ -69,7 +69,7 @@ Method 2:
 ![alt tag](https://raw.github.com/conekta/conekta-woocommerce/master/readme_files/form.png)
 
 - To manage orders for offline payments so that the status changes dynamically, you will need to add the following url as a webhook in your Conekta account:
-  http://tusitio.com/wc-api/WC_Conekta_Cash_Gateway
+  http://tusitio.com/wc-api/WC_Conekta_Payment_Gateway
 
 ![alt tag](https://raw.github.com/conekta/conekta-woocommerce/master/readme_files/webhook.png)
 

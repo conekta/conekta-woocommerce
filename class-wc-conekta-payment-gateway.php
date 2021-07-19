@@ -766,31 +766,29 @@ class WC_Conekta_Payment_Gateway extends WC_Conekta_Plugin {
 		wp_delete_post( $order_id, true );
 		$current_order_data = WC_Conekta_Plugin::ckpg_get_conekta_unfinished_order( WC()->session->get_customer_id(), WC()->cart->get_cart_hash() );
 		$this->order        = wc_get_order( $current_order_data->order_number );
-		$current_order      = \Conekta\Order::find( $current_order_data->order_id );
-		$payment_type       = $current_order->charges[0]->payment_method->object;
+		$payment_type       = filter_input( INPUT_POST, 'conekta_payment_method' );
 		$this->order->set_payment_method( WC()->payment_gateways()->get_available_payment_gateways()[ $this->id ] );
 		if ( $this->ckpg_set_as_paid( $current_order_data ) ) {
-			$charge               = $current_order->charges[0];
-			$this->transaction_id = $charge->id;
-			if ( 'card_payment' === $payment_type ) {
+			$this->transaction_id = filter_input( INPUT_POST, 'charge_id' );
+			if ( 'credit' === $payment_type || 'debit' === $payment_type ) {
 				$this->order->set_payment_method_title( $this->settings['card_title'] );
 				$this->ckpg_completeOrder();
 				update_post_meta( $this->order->get_id(), 'transaction_id', $this->transaction_id );
 			} else {
-				if ( 'cash_payment' === $payment_type ) {
+				if ( 'oxxo' === $payment_type ) {
 					$this->order->set_payment_method_title( $this->settings['oxxo_title'] );
-					update_post_meta( $this->order->get_id(), 'conekta-referencia', $charge->payment_method->reference );
+					update_post_meta( $this->order->get_id(), 'conekta-referencia', filter_input( INPUT_POST, 'reference' ) );
 					// Mark as on-hold (we're awaiting the notification of payment).
 					$this->order->update_status( 'on-hold', __( 'Awaiting the conekta OXXO payment', 'woocommerce' ) );
 				} else {
 					$this->order->set_payment_method_title( $this->settings['spei_title'] );
-					update_post_meta( $this->order->get_id(), 'conekta-clabe', $charge->payment_method->clabe );
+					update_post_meta( $this->order->get_id(), 'conekta-clabe', filter_input( INPUT_POST, 'clabe' ) );
 					// Mark as on-hold (we're awaiting the notification of payment).
 					$this->order->update_status( 'on-hold', __( 'Awaiting the conekta SPEI payment', 'woocommerce' ) );
 				}
-				update_post_meta( $this->order->get_id(), 'conekta-id', $charge->id );
-				update_post_meta( $this->order->get_id(), 'conekta-creado', $charge->created_at );
-				update_post_meta( $this->order->get_id(), 'conekta-expira', $charge->payment_method->expires_at );
+				update_post_meta( $this->order->get_id(), 'conekta-id', $this->transaction_id );
+				update_post_meta( $this->order->get_id(), 'conekta-creado', time() );
+				update_post_meta( $this->order->get_id(), 'conekta-expira', $this->ckpg_expiration_payment() );
 				// Remove cart.
 				$woocommerce->cart->empty_cart();
 				if ( isset( $_SESSION['order_awaiting_payment'] ) ) {
@@ -1034,7 +1032,6 @@ function ckpg_create_order() {
 				WC_Conekta_Plugin::ckpg_update_conekta_metadata( $wc_user_id, WC_Conekta_Plugin::CONEKTA_CUSTOMER_ID, $customer->id );
 			}
 		}
-
 		$old_order = WC_Conekta_Plugin::ckpg_get_conekta_unfinished_order( WC()->session->get_customer_id(), WC()->cart->get_cart_hash() );
 		if ( empty( $old_order ) ) {
 
@@ -1159,7 +1156,7 @@ function ckpg_create_order() {
 		}
 		$response = array(
 			'checkout_id' => $order->checkout['id'],
-			'key'         => $gateway->secret_key,
+			'key'         => $gateway->publishable_key,
 			'price'       => WC()->cart->total,
 			'spei_text'   => $gateway->settings['spei_description'],
 			'cash_text'   => $gateway->settings['oxxo_description'],
